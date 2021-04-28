@@ -1,0 +1,75 @@
+name: CentOS Linux
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: ['7.5.1804', '8.3.2011']
+
+    container: centos:${{ matrix.tag }}
+
+    steps:
+      - run: yum -y update && yum -y install git patch file
+        if:  ${{ matrix.tag == '7.5.1804' }}
+
+      - run: dnf -y update && dnf -y install git patch file
+        if:  ${{ matrix.tag == '8.3.2011' }}
+
+      - uses: actions/checkout@v2
+
+      - run: git clone https://github.com/universal-ctags/ctags
+      - run: cp -r * ctags/
+      - run: cd ctags && patch -p1 < patch/*.patch
+      - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release
+      - run: cd ctags && ./cmakew install
+      - run: file /usr/bin/ctags
+      - run: /usr/bin/ctags --version
+
+  test_6_10:
+    runs-on: ubuntu-20.04
+
+    container: centos:6.10
+
+    steps:
+      - run: |
+          sed -i 's|#baseurl=|baseurl=|g'       /etc/yum.repos.d/CentOS-Base.repo
+          sed -i 's|mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/CentOS-Base.repo
+          sed -i 's|mirror|vault|g'             /etc/yum.repos.d/CentOS-Base.repo
+          sed -i 's|http:|https:|g'             /etc/yum.repos.d/CentOS-Base.repo
+
+      - run: yum -y update
+      - run: yum -y install patch file gcc make curl xz libcurl-devel expat-devel gettext gettext-devel openssl-devel zlib-devel perl-ExtUtils-MakeMaker
+
+      - run: |
+          curl -LO https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.30.0.tar.xz
+          tar xf git-2.30.0.tar.xz
+          cd git-2.30.0
+          ./configure
+          make
+          make install
+
+      - run: git --version
+
+      - run: git init
+      - run: git remote add origin https://github.com/${{github.repository}}
+      - run: git config --local gc.auto 0
+      - run: git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +${{github.sha}}:refs/remotes/origin/master
+      - run: git checkout --progress --force -B master refs/remotes/origin/master
+      - run: ls
+
+      - run: git clone https://github.com/universal-ctags/ctags
+      - run: cp -r * ctags/
+      - run: cd ctags && patch -p1 < patch/*.patch
+      - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release
+      - run: cd ctags && ./cmakew install
+      - run: file /usr/bin/ctags
+      - run: /usr/bin/ctags --version

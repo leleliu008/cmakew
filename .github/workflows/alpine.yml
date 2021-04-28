@@ -1,0 +1,31 @@
+name: AlpineLinux
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: [3.9.3, 3.10.9, 3.11.11, 3.12.7, 3.13.5]
+
+    container: alpine:${{ matrix.tag }}
+
+    steps:
+      - run: apk add git patch file
+
+      - uses: actions/checkout@v2
+
+      - run: git clone https://github.com/universal-ctags/ctags
+      - run: cp -r * ctags/
+      - run: cd ctags && patch -p1 < patch/*.patch
+      - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release
+      - run: cd ctags && ./cmakew install
+      - run: file /usr/bin/ctags
+      - run: /usr/bin/ctags --version

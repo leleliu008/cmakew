@@ -1,0 +1,28 @@
+diff --git a/main/general.h b/main/general.h
+index 1b2acf74..d3230f04 100644
+--- a/main/general.h
++++ b/main/general.h
+@@ -9,17 +9,14 @@
+ #ifndef CTAGS_MAIN_GENERAL_H
+ #define CTAGS_MAIN_GENERAL_H
+ 
+-/*
+-*   INCLUDE FILES
+-*/
+-#if defined (HAVE_CONFIG_H)
+-# include <config.h>
+-#elif defined (WIN32)
+-# include "e_msoft.h"
++#ifdef HAVE_CONFIG_H
++#include <config.h>
++#endif
++
++#ifdef WIN32
++#include <win32/win32.h>
+ #endif
+ 
+-/*  To provide timings features.
+- */
+ #include <time.h>
+ 
+ /*

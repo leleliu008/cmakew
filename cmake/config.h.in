@@ -1,0 +1,342 @@
+/* Define the full name of this package. */
+#define PACKAGE_NAME "@PACKAGE_NAME@"
+
+/* Define the version of this package. */
+#define PACKAGE_VERSION "@PACKAGE_VERSION@"
+
+/* Define the home webpage of this package. */
+#define PACKAGE_HOMEPAGE_URL "@PACKAGE_HOMEPAGE_URL@"
+
+/* Define the bug reports url of this package. */
+#define PACKAGE_BUGREPORT_URL "@PACKAGE_BUGREPORT_URL@"
+
+/* Define the compiled time(UTC) of this package (format: YYmmddHHMMSS). */
+#define COMPILED_DATETIME "@COMPILED_DATETIME@"
+
+/* Define the git repo HEAD commit id of this package. */
+#define CTAGS_REPOINFO "@GIT_COMMITID@"
+
+/* You can define this label to be a string containing the name of a
+   site-specific configuration file containing site-wide default options. The
+   files /etc/ctags.conf and /usr/local/etc/ctags.conf are already checked, so
+   only define one here if need a file somewhere else. */
+#cmakedefine CUSTOM_CONFIGURATION_FILE "@CUSTOM_CONFIGURATION_FILE@"
+
+/* If wish to change the directory in which temporary files are stored,
+   define this label to the directory desired. */
+#cmakedefine TMPDIR "@TMPDIR@"
+
+/* Define the string to check (in executable name) for etags mode */
+#define ETAGS "etags"
+
+
+
+
+/* Define if building universal (internal helper macro) */
+#cmakedefine AC_APPLE_UNIVERSAL_BUILD
+
+/* Define if target system uses case-insensitive file names */
+#cmakedefine CASE_INSENSITIVE_FILENAMES
+
+/* Define if wish to check the regcomp() function at run time
+   for correct behavior. This function is currently broken on Cygwin. */
+#cmakedefine CHECK_REGCOMP
+
+
+/* Define this as desired.
+ * 1:  Original ctags format
+ * 2:  Extended ctags format with extension flags in EX-style comment.
+ */
+#define DEFAULT_FILE_FORMAT	2
+
+
+/* Define if use the system sort utility (which is probably more
+*  efficient) over the internal sorting algorithm.
+*/
+#cmakedefine INTERNAL_SORT
+#cmakedefine EXTERNAL_SORT
+
+
+
+/* Define if gcov is instrumented. */
+#cmakedefine ENABLE_GCOV
+
+/* Define if support multibyte character encoding. */
+#cmakedefine HAVE_ICONV
+
+/* Define if jansson library is available. */
+#cmakedefine HAVE_JANSSON
+
+/* Define if libxml2 library is available. */
+#cmakedefine HAVE_LIBXML
+
+/* Define if libyaml library is available. */
+#cmakedefine HAVE_LIBYAML
+
+/* Define if libseccomp library is available. */
+#cmakedefine HAVE_SECCOMP
+
+
+
+/* Define if have the <direct.h> header file. */
+#cmakedefine HAVE_DIRECT_H
+
+/* Define if have the <dirent.h> header file. */
+#cmakedefine HAVE_DIRENT_H
+
+/* Define if have the <fcntl.h> header file. */
+#cmakedefine HAVE_FCNTL_H
+
+/* Define if have the <fnmatch.h> header file. */
+#cmakedefine HAVE_FNMATCH_H
+
+/* Define if have the <inttypes.h> header file. */
+#cmakedefine HAVE_INTTYPES_H
+
+/* Define if have the <io.h> header file. */
+#cmakedefine HAVE_IO_H
+
+/* Define if have the <stat.h> header file. */
+#cmakedefine HAVE_STAT_H
+
+/* Define if have the <stdbool.h> header file. */
+#cmakedefine HAVE_STDBOOL_H
+
+/* Define if have the <stdint.h> header file. */
+#cmakedefine HAVE_STDINT_H
+
+/* Define if have the <stdio.h> header file. */
+#cmakedefine HAVE_STDIO_H
+
+/* Define if have the <stdlib.h> header file. */
+#cmakedefine HAVE_STDLIB_H
+
+/* Define if have the <types.h> header file. */
+#cmakedefine HAVE_TYPES_H
+
+/* Define if have the <unistd.h> header file. */
+#cmakedefine HAVE_UNISTD_H
+
+/* Define if have the <strings.h> header file. */
+#cmakedefine HAVE_STRINGS_H
+
+/* Define if have the <string.h> header file. */
+#cmakedefine HAVE_STRING_H
+
+/* Define if have the <sys/dir.h> header file. */
+#cmakedefine HAVE_SYS_DIR_H
+
+/* Define if have the <sys/stat.h> header file. */
+#cmakedefine HAVE_SYS_STAT_H
+
+/* Define if have the <sys/types.h> header file. */
+#cmakedefine HAVE_SYS_TYPES_H
+
+/* Define if have the <sys/wait.h> header file. */
+#cmakedefine HAVE_SYS_WAIT_H
+
+
+
+
+/* Define if have the declaration of `strnlen' */
+#cmakedefine HAVE_DECL_STRNLEN
+
+/* Define if have the declaration of `__environ' */
+#cmakedefine HAVE_DECL___ENVIRON
+
+/* Define if have the declaration of `_NSGetEnviron' */
+#cmakedefine HAVE_DECL__NSGETENVIRON
+
+
+
+
+/* Define if have the `asprintf' function. */
+#cmakedefine HAVE_ASPRINTF
+
+/* Define if have the `snprintf' function. */
+#cmakedefine HAVE_SNPRINTF
+
+/* Define if have the `_snprintf' function. */
+#cmakedefine HAVE__SNPRINTF
+
+/* Define if have the `chmod' function. */
+#cmakedefine HAVE_CHMOD
+
+/* Define if have the `chsize' function. */
+#cmakedefine HAVE_CHSIZE
+
+/* Define if have the `findfirst' function. */
+#cmakedefine HAVE_FINDFIRST
+
+/* Define if have the `findnext' function. */
+#cmakedefine HAVE_FINDNEXT
+
+/* Define if have the `fnmatch' function. */
+#cmakedefine HAVE_FNMATCH
+
+/* Define if have the `ftruncate' function. */
+#cmakedefine HAVE_FTRUNCATE
+
+/* Define if have the `mblen' function. */
+#cmakedefine HAVE_MBLEN
+
+/* Define if have the `mkstemp' function. */
+#cmakedefine HAVE_MKSTEMP
+
+/* Define if have the `opendir' function. */
+#cmakedefine HAVE_OPENDIR
+
+/* Define if have the `putenv' function. */
+#cmakedefine HAVE_PUTENV
+
+/* Define if have the `regcomp' function. */
+#cmakedefine HAVE_REGCOMP
+
+/* Define if have the `scandir' function. */
+#cmakedefine HAVE_SCANDIR
+
+/* Define if have the `setenv' function. */
+#cmakedefine HAVE_SETENV
+
+/* Define if have the `strcasecmp' function. */
+#cmakedefine HAVE_STRCASECMP
+
+/* Define if have the `strerror' function. */
+#cmakedefine HAVE_STRERROR
+
+/* Define if have the `stricmp' function. */
+#cmakedefine HAVE_STRICMP
+
+/* Define if have the `strncasecmp' function. */
+#cmakedefine HAVE_STRNCASECMP
+
+/* Define if have the `strnicmp' function. */
+#cmakedefine HAVE_STRNICMP
+
+/* Define if have the `strstr' function. */
+#cmakedefine HAVE_STRSTR
+
+/* Define if have the `tempnam' function. */
+#cmakedefine HAVE_TEMPNAM
+
+/* Define if have the `truncate' function. */
+#cmakedefine HAVE_TRUNCATE
+
+/* Define if have the `_findfirst' function. */
+#cmakedefine HAVE__FINDFIRST
+
+
+
+
+/* Define if typeof works with your compiler. */
+#cmakedefine HAVE_TYPEOF
+
+/* Define if compiler supports statement expression non-standard C feature. */
+#cmakedefine HAVE_STATEMENT_EXPRESSION_EXT
+
+/* Define if the field "st_ino" exists in struct stat in <sys/stat.h>. */
+#cmakedefine HAVE_STAT_ST_INO
+
+
+
+/* Define if the platform uses "lib" as prefix for iconv functions. */
+#cmakedefine ICONV_USE_LIB_PREFIX
+
+/* Define as the maximum integer on your system if not defined <limits.h>. */
+#cmakedefine INT_MAX
+
+/* Define to the appropriate size for tmpnam() if <stdio.h> does not define
+   this. */
+#cmakedefine L_tmpnam
+
+/* Define this label if want macro tags (defined lables) to use patterns
+   in the EX command by default (original ctags behavior is to use line
+   numbers). */
+#cmakedefine MACROS_USE_PATTERNS
+
+/* Define if your system uses MS-DOS style path. */
+#cmakedefine MSDOS_STYLE_PATH
+
+/* If receive error or warning messages indicating that are missing a
+   prototype for, or a type mismatch using, the following function, define
+   this label and remake. */
+#cmakedefine NEED_PROTO_FTRUNCATE
+
+/* If receive error or warning messages indicating that are missing a
+   prototype for, or a type mismatch using, the following function, define
+   this label and remake. */
+#cmakedefine NEED_PROTO_LSTAT
+
+/* If receive error or warning messages indicating that are missing a
+   prototype for, or a type mismatch using, the following function, define
+   this label and remake. */
+#cmakedefine NEED_PROTO_STAT
+
+/* If receive error or warning messages indicating that are missing a
+   prototype for, or a type mismatch using, the following function, define
+   this label and remake. */
+#cmakedefine NEED_PROTO_TRUNCATE
+
+/* Define this is have a prototype for putenv() in <stdlib.h>, but doesn't
+   declare its argument as "const char *". */
+#cmakedefine NON_CONST_PUTENV_PROTOTYPE
+
+
+/* Define if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
+#cmakedefine STDC_HEADERS
+
+
+/* Define WORDS_BIGENDIAN if your processor stores words with the most
+   significant byte first (like Motorola and SPARC, unlike Intel). */
+#if defined AC_APPLE_UNIVERSAL_BUILD
+# if defined __BIG_ENDIAN__
+#  define WORDS_BIGENDIAN 1
+# endif
+#else
+# ifndef WORDS_BIGENDIAN
+#  undef WORDS_BIGENDIAN
+# endif
+#endif
+
+/* Number of bits in a file offset, on hosts where this is settable. */
+#cmakedefine _FILE_OFFSET_BITS
+
+/* Define for large files, on AIX-style hosts. */
+#cmakedefine _LARGE_FILES
+
+/* Define to the appropriate type if <time.h> does not define this. */
+#cmakedefine clock_t
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#cmakedefine const
+
+/* Define to long if <stdio.h> does not define this. */
+#cmakedefine fpos_t
+
+/* Define to `long int' if <sys/types.h> does not define. */
+#cmakedefine off_t
+
+/* Define remove to unlink if have unlink(), but not remove(). */
+#cmakedefine remove
+
+/* Define to __typeof__ if your compiler spells it that way. */
+#cmakedefine typeof
+
+#ifndef HAVE_STRCASECMP
+#ifdef  HAVE_STRICMP
+#define strcasecmp stricmp
+#endif
+#endif
+
+#ifndef HAVE_SNPRINTF
+#ifdef  HAVE__SNPRINTF
+#define snprintf _snprintf
+#endif
+#endif
+
+#ifndef HAVE_STDBOOL_H
+#define HAVE_STDBOOL_H
+typedef enum { false, true } bool;
+#endif

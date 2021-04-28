@@ -1,0 +1,42 @@
+diff --git a/main/options.c b/main/options.c
+index b6c12cac..1845b422 100644
+--- a/main/options.c
++++ b/main/options.c
+@@ -39,6 +39,8 @@
+ #include "writer_p.h"
+ #include "trace.h"
+ 
++#include <datetime/datetime.h>
++
+ #ifdef HAVE_JANSSON
+ #include <jansson.h>
+ #endif
+@@ -1489,7 +1491,7 @@ static void printFeatureList (void)
+ 	for (i = 0 ; Features [i].name != NULL ; ++i)
+ 	{
+ 		if (i == 0)
+-			printf ("  Optional compiled features: ");
++			printf ("  Compiled Features: ");
+ 		if (strcmp (Features [i].name, "regex") != 0 || checkRegex ())
+ 			printf ("%s+%s", (i>0 ? ", " : ""), Features [i].name);
+ #ifdef CUSTOM_CONFIGURATION_FILE
+@@ -1580,13 +1582,15 @@ static void printProgramIdentification (void)
+ 		printf ("%s %s(%s), %s %s\n",
+ 			PROGRAM_NAME, PROGRAM_VERSION, ctags_repoinfo,
+ 			PROGRAM_COPYRIGHT, AUTHOR_NAME);
+-	printf ("Universal Ctags is derived from Exuberant Ctags.\n");
+-	printf ("Exuberant Ctags 5.8, Copyright (C) 1996-2009 Darren Hiebert\n");
++	printf ("Universal Ctags is derived from Exuberant Ctags 5.8, Copyright (C) 1996-2009 Darren Hiebert\n");
+ 
+-	printf ("  Compiled: %s, %s\n", __DATE__, __TIME__);
+-	printf ("  URL: %s\n", PROGRAM_URL);
++    char compiled_datetime[24] = {0};
++    parse_compiled_datetime(COMPILED_DATETIME, compiled_datetime);
++	printf ("  Compiled DateTime: %s\n", compiled_datetime);
+ 
+ 	printFeatureList ();
++
++	printf ("\nFor more information, please visit our website at %s\n", PROGRAM_URL);
+ }
+ 
+ static void processHelpOptionCommon (
