@@ -1297,8 +1297,7 @@ __fetch_cmake_binary_archive_if_needed() {
         fi
 
         if [ ! -f "$CMAKE_BINARY_ARCHIVE_FILEPATH" ] ; then
-            
-            run curl --fail --retry 20 --retry-delay 30 -L -o "${CMAKE_BINARY_ARCHIVE_FILEPATH}" "${CMAKE_BINARY_ARCHIVE_URL}"  || return 1
+           fetch "$CMAKE_BINARY_ARCHIVE_URL" --output-dir="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" --output-name="$CMAKE_BINARY_ARCHIVE_FILENAME" || return 1
         fi
          
         run tar xf "${CMAKE_BINARY_ARCHIVE_FILEPATH}" -C "${CMAKE_BINARY_ARCHIVE_UNPACK_DIR}" --strip-components 1 || return 1
