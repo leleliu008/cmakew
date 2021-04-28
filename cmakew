@@ -1273,21 +1273,21 @@ __fetch_cmake_binary_archive_if_needed() {
 
     case $1 in
         linux)
-            CMAKE_COMMAND="${CMAKE_BINARY_ARCHIVE_UNPACK_DIR}/bin/cmake"
-            export PATH="${CMAKE_BINARY_ARCHIVE_UNPACK_DIR}/bin:$PATH"
+            CMAKE_COMMAND="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/bin/cmake"
+            export PATH="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/bin:$PATH"
             ;;
         macos)
-            CMAKE_COMMAND="${CMAKE_BINARY_ARCHIVE_UNPACK_DIR}/CMake.app/Contents/bin/cmake"
-            export PATH="${CMAKE_BINARY_ARCHIVE_UNPACK_DIR}/CMake.app/Contents/bin:$PATH"
+            CMAKE_COMMAND="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/CMake.app/Contents/bin/cmake"
+            export PATH="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/CMake.app/Contents/bin:$PATH"
     esac
 
     CMAKE_BINARY_VERSION="3.20.1"
      
     # https://cmake.org/download
-    CMAKE_BINARY_ARCHIVE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_BINARY_VERSION}/cmake-${CMAKE_BINARY_VERSION}-$1-$2.tar.gz"
+    CMAKE_BINARY_ARCHIVE_URL="https://github.com/Kitware/CMake/releases/download/v$CMAKE_BINARY_VERSION/cmake-$CMAKE_BINARY_VERSION-$1-$2.tar.gz"
 
-    CMAKE_BINARY_ARCHIVE_FILENAME=$(basename ${CMAKE_BINARY_ARCHIVE_URL})
-    CMAKE_BINARY_ARCHIVE_FILEPATH="${CMAKE_BINARY_ARCHIVE_UNPACK_DIR}/${CMAKE_BINARY_ARCHIVE_FILENAME}"
+    CMAKE_BINARY_ARCHIVE_FILENAME=$(basename $CMAKE_BINARY_ARCHIVE_URL)
+    CMAKE_BINARY_ARCHIVE_FILEPATH="$CMAKE_BINARY_ARCHIVE_CACHED_DIR/$CMAKE_BINARY_ARCHIVE_FILENAME"
     
     if [ -f "$CMAKE_COMMAND" ] && [ -x "$CMAKE_COMMAND" ] && "$CMAKE_COMMAND" --version > /dev/null 2>&1 ; then
         :
@@ -1297,10 +1297,10 @@ __fetch_cmake_binary_archive_if_needed() {
         fi
 
         if [ ! -f "$CMAKE_BINARY_ARCHIVE_FILEPATH" ] ; then
-           fetch "$CMAKE_BINARY_ARCHIVE_URL" --output-dir="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" --output-name="$CMAKE_BINARY_ARCHIVE_FILENAME" || return 1
+           fetch "$CMAKE_BINARY_ARCHIVE_URL" --output-dir="$CMAKE_BINARY_ARCHIVE_CACHED_DIR" --output-name="$CMAKE_BINARY_ARCHIVE_FILENAME" || return 1
         fi
          
-        run tar xf "${CMAKE_BINARY_ARCHIVE_FILEPATH}" -C "${CMAKE_BINARY_ARCHIVE_UNPACK_DIR}" --strip-components 1 || return 1
+        run tar xf "$CMAKE_BINARY_ARCHIVE_FILEPATH" -C "$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1 || return 1
     fi
 }
 
