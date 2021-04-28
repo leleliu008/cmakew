@@ -1299,7 +1299,7 @@ __fetch_cmake_binary_archive_if_needed() {
         if [ ! -f "$CMAKE_BINARY_ARCHIVE_FILEPATH" ] ; then
            fetch "$CMAKE_BINARY_ARCHIVE_URL" --output-dir="$CMAKE_BINARY_ARCHIVE_CACHED_DIR" --output-name="$CMAKE_BINARY_ARCHIVE_FILENAME" || return 1
         fi
-         
+        run install -d "$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" || return 1 
         run tar xf "$CMAKE_BINARY_ARCHIVE_FILEPATH" -C "$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1 || return 1
     fi
 }
