@@ -29,7 +29,12 @@ jobs:
           run git clone https://github.com/universal-ctags/ctags
           run cp -r cmake cmakew CMakeLists.txt src patch misc ctags/
           run cd ctags
-          run patch -p1 < $(find patch -name "*.patch")
+          
+          for item in patch/*.patch
+          do
+            patch -p1 < "$item" || return 1
+          done
+          
           run ./cmakew config -DCMAKE_BUILD_TYPE=Release
           run ./cmakew install
           run file /usr/bin/ctags
