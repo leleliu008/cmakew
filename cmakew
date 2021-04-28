@@ -1484,26 +1484,26 @@ EOF
         else
             case $NATIVE_OS_KIND in
             linux)
-                echo "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
+                warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
                 we will download prebuild binary from download.cmake.com"
                 __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1 ;;
             darwin)
-                echo "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
+                warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
                 we will download prebuild binary from download.cmake.com"
                 __fetch_cmake_binary_archive_if_needed macos universal         || return 1 ;;
-            *)  echo "cmake not exists. we will install it via package manager"
+            *)  warn "cmake not exists. we will install it via package manager"
                 __install_command_via_available_package_manager cmake
         esac
         fi
     else
         case $NATIVE_OS_KIND in
             linux)
-                echo "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
+                warn " cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
                 __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1 ;;
             darwin)
-                echo "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
+                warn " cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
                 __fetch_cmake_binary_archive_if_needed macos universal         || return 1 ;;
-            *)  echo "cmake not exists. we will install it via package manager"
+            *)  warn " cmake not exists. we will install it via package manager"
                 __install_command_via_available_package_manager cmake
         esac
     fi

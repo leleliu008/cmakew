@@ -37,5 +37,5 @@ jobs:
 
           run ./cmakew config -DCMAKE_BUILD_TYPE=Release
           run ./cmakew install
-          run file /usr/bin/ctags
-          run /usr/bin/ctags --version
+          run file /usr/local/bin/ctags
+          run /usr/local/bin/ctags --version
