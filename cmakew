@@ -28,7 +28,7 @@ success() {
 }
 
 warn() {
-    print "${COLOR_YELLOW}🔥 $*\n${COLOR_OFF}"
+    print "${COLOR_YELLOW}🔥  $*\n${COLOR_OFF}"
 }
 
 error() {
@@ -1307,17 +1307,26 @@ __fetch_cmake_binary_archive_if_needed() {
 __perform_config() {
     title 'perform cmakew config'
     
+    unset GENERATOR_SET
     unset BUILD_DIR_SET
+
     unset BUILD_DIR
+    unset GENERATOR
+
     unset CMAKE_FLAGS
     
     for item in $@
     do
         case $item in
             -B) BUILD_DIR_SET=true ;;
+            -G) GENERATOR_SET=true ;;
             *)  if [ "$BUILD_DIR_SET" = 'true' ] ; then
                     BUILD_DIR="$item"
                     unset BUILD_DIR_SET
+                fi
+                if [ "$GENERATOR_SET" = 'true' ] ; then
+                    GENERATOR="$item"
+                    unset GENERATOR_SET
                 fi
         esac
     done
@@ -1332,6 +1341,13 @@ __perform_config() {
             $@
             -S . 
             -B build.d"
+    fi
+
+    if [ -z "$GENERATOR" ] || [ "$GENERATOR" = 'Unix Makefiles' ] ; then
+        if ! exists command make ; then
+            warn "make not exists. we will install it via package manager"
+            __install_command_via_available_package_manager make
+        fi
     fi
 
     if run cmake $CMAKE_FLAGS ; then
@@ -1498,17 +1514,25 @@ EOF
     else
         case $NATIVE_OS_KIND in
             linux)
-                warn " cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
+                warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
                 __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1 ;;
             darwin)
-                warn " cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
+                warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
                 __fetch_cmake_binary_archive_if_needed macos universal         || return 1 ;;
-            *)  warn " cmake not exists. we will install it via package manager"
+            *)  warn "cmake not exists. we will install it via package manager"
                 __install_command_via_available_package_manager cmake
         esac
     fi
 
     [ -z "$1" ] && return 0
+
+    if [ -d "$HOME/.cmakew/unpack/bin" ] ; then
+       export PATH="$HOME/.cmakew/unpack/bin:$PATH"
+    fi
+
+    if [ -d "$HOME/.cmakew/unpack/CMake.app/Contents/bin" ] ; then
+        export PATH="$HOME/.cmakew/unpack/CMake.app/Contents/bin:$PATH"
+    fi
 
     eval "__perform_$1 $(shiftn 1 $@)"
 }
