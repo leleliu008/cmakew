@@ -486,6 +486,7 @@ EOF
                         fi
                         return 1
                 esac
+                ;;
             version)
                 case $(os kind) in
                     freebsd) freebsd-version ;;
