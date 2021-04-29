@@ -10,10 +10,10 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     
-    container: gentoo/stage3:nomultilib
+    container: madhacking/gentoo
 
     steps:
-      - run: emerge git patch file
+      - run: emerge dev-vcs/git patch file
 
       - uses: actions/checkout@v2
 

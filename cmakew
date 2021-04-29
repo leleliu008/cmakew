@@ -162,7 +162,7 @@ __fetch_archive_via_tools() {
     fi
 
     AVAILABLE_FETCH_TOOL=$(__get_available_fetch_tool)
-    
+
     if [ -z "$AVAILABLE_FETCH_TOOL" ] ; then
         warn "no fetch tools found, install curl via package manager"
         __install_command_via_available_package_manager curl
@@ -488,19 +488,21 @@ EOF
 }
 
 location_of_python_module() {
-    PIP_COMMAND=$(command -v pip3) ||
-    PIP_COMMAND=$(command -v pip) ||
-    die "can't found pip command."
-
-    "$PIP_COMMAND" show $1 | grep 'Location:' | cut -d ' ' -f2
+    PIP_COMMAND=$(command -v pip3 || command -v pip)
+    if [ -z "$PIP_COMMAND" ] ; then
+        die "can't found pip command."
+    else
+        "$PIP_COMMAND" show $1 | grep 'Location:' | cut -d ' ' -f2
+    fi
 }
 
 version_of_python_module() {
-    PIP_COMMAND=$(command -v pip3) ||
-    PIP_COMMAND=$(command -v pip) ||
-    die "can't found pip command."
-
-    "$PIP_COMMAND" show $1 | grep 'Version:' | cut -d ' ' -f2
+    PIP_COMMAND=$(command -v pip3 || command -v pip)
+    if [ -z "$PIP_COMMAND" ] ; then
+        die "can't found pip command."
+    else
+        "$PIP_COMMAND" show $1 | grep 'Version:' | cut -d ' ' -f2
+    fi
 }
 
 # retrive the version of a command from it's name or path
@@ -691,10 +693,8 @@ command_version_match() {
 get_choco_package_name_by_command_name() {
     case $1 in
       cc|gcc) echo 'gcc-g++' ;;
-        make) echo 'make' ;;
        gmake) echo 'make' ;;
          gm4) echo 'm4'    ;;
-       gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
@@ -706,8 +706,6 @@ get_choco_package_name_by_command_name() {
     automake|autoheader)
               echo "automake" ;;
     autopoint) echo "gettext" ;;
-    pkg-config) 
-              echo "pkgconf" ;;
         *) echo "$1"
     esac
 }
@@ -852,6 +850,9 @@ __mingw_w64_x86_64() {
 }
 
 get_pacman_package_name_by_command_name() {
+    if [ "$1" = 'make' ] || [ "$1" = 'gmake' ] ; then
+        echo make
+    fi
     case $NATIVE_OS_TYPE in
         mingw32) __mingw_w64_i686   $(__get_pacman_package_name_by_command_name "$1") ;;
         mingw64) __mingw_w64_x86_64 $(__get_pacman_package_name_by_command_name "$1") ;;
@@ -1104,6 +1105,11 @@ __install_command_via_available_package_manager() {
 # make
 required_command_exists_and_version_matched() {
     if exists command "$1" ; then
+        if [ "$NATIVE_OS_TYPE" = 'cygwin' ] ; then
+            case $(command -v "$1") in
+                /cygdrive/*) return 1
+            esac
+        fi
         if [ $# -eq 3 ] ; then
             command_version_match $@
         fi
@@ -1304,7 +1310,7 @@ __fetch_cmake_binary_archive_if_needed() {
     fi
 }
 
-__perform_config() {
+perform_config() {
     title 'perform cmakew config'
     
     unset GENERATOR_SET
@@ -1357,7 +1363,7 @@ __perform_config() {
     fi
 }
 
-__perform_build() {
+perform_build() {
     title 'perform cmakew build'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
@@ -1367,7 +1373,7 @@ __perform_build() {
     fi
 }
 
-__perform_install() {
+perform_install() {
     title 'perform cmakew install'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
@@ -1377,7 +1383,7 @@ __perform_install() {
     fi
 }
 
-__perform_pack() {
+perform_pack() {
     title 'perform cmakew pack'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
@@ -1392,7 +1398,7 @@ __perform_pack() {
     fi
 }
 
-__perform_test() {
+perform_test() {
     title 'perform cmakew test'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
@@ -1403,7 +1409,7 @@ __perform_test() {
     fi
 }
 
-__perform_clean() {
+perform_clean() {
     title 'perform cmakew clean'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
@@ -1413,6 +1419,9 @@ __perform_clean() {
 }
 
 main() {
+    echo "${COLOR_GREEN}cmake wrapper is desinged to help you using cmake easily.${COLOR_OFF}"
+    echo
+
     case $1 in
         -h|--help)
         cat <<EOF
@@ -1446,14 +1455,39 @@ EOF
     unset NATIVE_OS_VERS
     unset NATIVE_OS_ARCH
 
-    unset AUTOCONF_VERSION_MREQUIRED
+    unset CMAKE_VERSION_MREQUIRED
 
     unset REQUIRED_ITEM_INDEX
     unset OPTIONAL_ITEM_INDEX
 
     unset RC_FILE
 
-    echo "${COLOR_GREEN}cmake wrapper is desinged to help you using cmake easily.${COLOR_OFF}"
+    case $1 in
+        '') ;;
+        -x|-d|--rc-file=*)
+            for item in $@
+            do
+                case $item in
+                    -x) set -x ;;
+                    -d) DEBUG=true ;;
+                    --rc-file=*)
+                        RC_FILE=$(echo "$item" | cut -d= -f2)
+                        if [ -z "$RC_FILE" ] ; then
+                            die "--rc-file=FILE FILE must not empty."
+                        else
+                            if ! exists file "$RC_FILE" ; then
+                                die "$item: file not exists."
+                            fi
+                        fi
+                        ;;
+                    *)  die "$item: not support argument."
+                esac
+            done
+            ;;
+        *)  die "$1: not support argument."
+    esac
+
+    [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
     title "current machine os info"
     NATIVE_OS_KIND=$(os kind)
@@ -1534,7 +1568,7 @@ EOF
         export PATH="$HOME/.cmakew/unpack/CMake.app/Contents/bin:$PATH"
     fi
 
-    eval "__perform_$1 $(shiftn 1 $@)"
+    eval "perform_$1 $(shiftn 1 $@)"
 }
 
 main $@

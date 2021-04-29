@@ -42,6 +42,7 @@ else()
 
         include(CheckCSourceCompiles)
         
+        # https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/iconv.h.html
         check_c_source_compiles("
             #include <stddef.h>
             #include <iconv.h>
