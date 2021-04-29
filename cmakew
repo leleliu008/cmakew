@@ -468,6 +468,7 @@ EOF
             libc)
                 case $(os kind) in
                     linux)
+                        # https://pubs.opengroup.org/onlinepubs/7908799/xcu/getconf.html
                         if command -v getconf > /dev/null ; then
                             if getconf GNU_LIBC_VERSION > /dev/null 2>&1 ; then
                                 echo glibc
@@ -563,26 +564,12 @@ version_of_command() {
         xmlto) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f3 ;;
       xmllint) ;;
      xsltproc) ;;
-         gzip)
-            unset TEMP_FILE
-            TEMP_FILE=$(mktemp)
-            "$1" --version > $TEMP_FILE 2>&1
-            cat $TEMP_FILE | head -n 1 | awk '{print($NF)}'
-            rm $TEMP_FILE
-            unset TEMP_FILE
-            ;;
+         gzip) "$1" --version 2>&1 | head -n 1 | awk '{print($NF)}' ;;
          lzip) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f2 ;;
            xz) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f4 ;;
           zip) "$1" --version 2> /dev/null | sed -n '2p' | cut -d ' ' -f4 ;;
         unzip) "$1" -v        2> /dev/null | head -n 1 | cut -d ' ' -f2 ;;
-        bzip2)
-            unset TEMP_FILE
-            TEMP_FILE=$(mktemp)
-            "$1" --help 2> $TEMP_FILE
-            cat $TEMP_FILE | head -n 1 | cut -d ' ' -f8 | cut -d ',' -f1
-            rm $TEMP_FILE
-            unset TEMP_FILE
-            ;;
+        bzip2) "$1" --help 2>&1 | head -n 1 | cut -d ' ' -f8 | cut -d ',' -f1 ;;
           tar)
             VERSION_MSG=$("$1" --version 2> /dev/null | head -n 1)
             case $VERSION_MSG in
@@ -599,13 +586,7 @@ version_of_command() {
          ruby) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f2 ;;
          perl) "$1" -v | sed -n '2p' | sed 's/.*v\([0-9]\.[0-9][0-9]\.[0-9]\).*/\1/' ;;
     python|python2|python3)
-            unset TEMP_FILE
-            TEMP_FILE=$(mktemp)
-            "$1" --version > $TEMP_FILE 2>&1
-            cat $TEMP_FILE | head -n 1 | cut -d ' ' -f2
-            rm $TEMP_FILE
-            unset TEMP_FILE
-            ;;
+               "$1" --version 2>&1 | head -n 1 | cut -d ' ' -f2 ;;
          pip)  "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f2 ;;
          pip3) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f2 ;;
          node) "$1" --version 2> /dev/null | head -n 1 | cut -d 'v' -f2 ;;
@@ -1116,7 +1097,7 @@ __install_command_via_available_package_manager() {
         fi
         for pm in $AVAILABLE_PACKAGE_MANAGER_LIST
         do
-            __install_command_via_package_manager "$pm" $@
+            __install_command_via_package_manager "$pm" $@ && return 0
         done
     fi
 }
@@ -1145,7 +1126,7 @@ required_command_exists_and_version_matched() {
 # required command python3    ge 3.5
 # optional python3 libxml2    ge 2.8
 # optional python3 libxml2
-__check_required_item() {
+__handle_required_item() {
     shift
     case $1 in
         command)
@@ -1297,20 +1278,53 @@ optional() {
 
 ######################################################################
 
+__xxx() {
+    if exists command cmake ; then
+        if command_version_match cmake ge "$CMAKE_VERSION_MREQUIRED" ; then
+            echo "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}"
+        else
+            case $NATIVE_OS_KIND in
+                linux)
+                    if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
+                        warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. we will install it via package manager"
+                        __install_command_via_available_package_manager cmake
+                    else
+                        warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}.
+                    we will download prebuild binary from download.cmake.com"
+                        __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
+                    fi
+                    ;;
+                darwin)
+                    warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}.
+                    we will download prebuild binary from download.cmake.com"
+                    __fetch_cmake_binary_archive_if_needed macos universal         || return 1
+                    ;;
+                *)  warn "cmake not exists. we will install it via package manager"
+                    __install_command_via_available_package_manager cmake
+            esac
+        fi
+    else
+        case $NATIVE_OS_KIND in
+            linux)
+                if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
+                    warn "cmake not exists. we will install it via package manager"
+                    __install_command_via_available_package_manager cmake
+                else
+                    warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
+                    __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
+                fi
+                ;;
+            darwin)
+                warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
+                __fetch_cmake_binary_archive_if_needed macos universal         || return 1
+                ;;
+            *)  warn "cmake not exists. we will install it via package manager"
+                __install_command_via_available_package_manager cmake
+        esac
+    fi
+}
+
 __fetch_cmake_binary_archive_if_needed() {
-    CMAKE_BINARY_ARCHIVE_CACHED_DIR="$HOME/.cmakew"
-    CMAKE_BINARY_ARCHIVE_UNPACK_DIR="$CMAKE_BINARY_ARCHIVE_CACHED_DIR/unpack"
-
-    case $1 in
-        linux)
-            CMAKE_COMMAND="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/bin/cmake"
-            export PATH="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/bin:$PATH"
-            ;;
-        macos)
-            CMAKE_COMMAND="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/CMake.app/Contents/bin/cmake"
-            export PATH="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/CMake.app/Contents/bin:$PATH"
-    esac
-
     CMAKE_BINARY_VERSION="3.20.1"
      
     # https://cmake.org/download
@@ -1337,7 +1351,7 @@ __fetch_cmake_binary_archive_if_needed() {
 ##################################################################
 
 perform_config() {
-    title 'perform cmakew config'
+    step 'perform cmakew config'
     
     unset GENERATOR_SET
     unset BUILD_DIR_SET
@@ -1377,7 +1391,6 @@ perform_config() {
 
     if [ -z "$GENERATOR" ] || [ "$GENERATOR" = 'Unix Makefiles' ] ; then
         if ! exists command make ; then
-            warn "make not exists. we will install it via package manager"
             __install_command_via_available_package_manager make
         fi
     fi
@@ -1390,7 +1403,7 @@ perform_config() {
 }
 
 perform_build() {
-    title 'perform cmakew build'
+    step 'perform cmakew build'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         run cmake --build "$BUILD_DIR" || return 1
@@ -1400,7 +1413,7 @@ perform_build() {
 }
 
 perform_install() {
-    title 'perform cmakew install'
+    step 'perform cmakew install'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         run cmake --build "$BUILD_DIR" --target install || return 1
@@ -1410,7 +1423,7 @@ perform_install() {
 }
 
 perform_pack() {
-    title 'perform cmakew pack'
+    step 'perform cmakew pack'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         for item in CPackConfig.cmake CPackSourceConfig.cmake
@@ -1425,7 +1438,7 @@ perform_pack() {
 }
 
 perform_test() {
-    title 'perform cmakew test'
+    step 'perform cmakew test'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         cd "$BUILD_DIR" || return 1
@@ -1436,7 +1449,7 @@ perform_test() {
 }
 
 perform_clean() {
-    title 'perform cmakew clean'
+    step 'perform cmakew clean'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         run rm -rf "'$BUILD_DIR'"
@@ -1491,7 +1504,18 @@ EOF
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
-    title "current machine os info"
+    step "load cmakew.rc"
+    if exists file "$RC_FILE" ; then
+        if . "$RC_FILE" ; then
+            success "$RC_FILE loaded successfully."
+        else
+            die "$RC_FILE load failed."
+        fi
+    else
+        warn "$RC_FILE not exist. skipped."
+    fi
+
+    step "show current machine os info"
     NATIVE_OS_KIND=$(os kind)
     NATIVE_OS_TYPE=$(os type)
     NATIVE_OS_NAME=$(os name)
@@ -1509,10 +1533,10 @@ EOF
         [ "$(whoami)" = root ] || sudo=sudo
     fi
     
-    title "current machine os effective user info"
+    step "show current machine os effective user info"
     id | tr ' ' '\n' | head -n 2
 
-    title "current project info"
+    step "show current project info"
 
     die_if_file_is_not_exist CMakeLists.txt
     
@@ -1526,54 +1550,64 @@ EOF
     echo "PROJECT_NAME    = $PROJECT_NAME"
     echo "PROJECT_VERSION = $PROJECT_VERSION"
 
-    title "check cmake"
     CMAKE_VERSION_MREQUIRED=$(grep 'cmake_minimum_required(VERSION\s*\[.*\])\s*$' CMakeLists.txt | sed 's/cmake_minimum_required(VERSION\s*\(.*\))/\1/')
     if [ -z "$CMAKE_VERSION_MREQUIRED" ] ; then
         CMAKE_VERSION_MREQUIRED=$(grep 'CMAKE_MINIMUM_REQUIRED(VERSION\s*\[.*\])\s*$' CMakeLists.txt | sed 's/CMAKE_MINIMUM_REQUIRED(VERSION\s*\(.*\))/\1/')
     fi
 
-    if exists command cmake ; then
-        if command_version_match cmake ge "$CMAKE_VERSION_MREQUIRED" ; then
-            echo "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}"
-        else
-            case $NATIVE_OS_KIND in
-                linux)
-                    if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
-                        warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. we will install it via package manager"
-                        __install_command_via_available_package_manager cmake
-                    else
-                        warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
-                    we will download prebuild binary from download.cmake.com"
-                        __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
-                    fi
-                    ;;
-                darwin)
-                    warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
-                    we will download prebuild binary from download.cmake.com"
-                    __fetch_cmake_binary_archive_if_needed macos universal         || return 1
-                    ;;
-                *)  warn "cmake not exists. we will install it via package manager"
-                    __install_command_via_available_package_manager cmake
-            esac
-        fi
+    if [ -z "$CMAKE_VERSION_MREQUIRED" ] ; then
+        required command cmake
     else
-        case $NATIVE_OS_KIND in
-            linux)
-                if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
-                    warn "cmake not exists. we will install it via package manager"
-                    __install_command_via_available_package_manager cmake
-                else
-                    warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
-                    __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
-                fi
-                ;;
-            darwin)
-                warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
-                __fetch_cmake_binary_archive_if_needed macos universal         || return 1
-                ;;
-            *)  warn "cmake not exists. we will install it via package manager"
-                __install_command_via_available_package_manager cmake
-        esac
+        required command cmake ge "$CMAKE_VERSION_MREQUIRED"
+    fi
+
+    CMAKE_BINARY_ARCHIVE_CACHED_DIR="$HOME/.cmakew"
+    CMAKE_BINARY_ARCHIVE_UNPACK_DIR="$CMAKE_BINARY_ARCHIVE_CACHED_DIR/unpack"
+
+    case $NATIVE_OS_KIND in
+        linux)  export PATH="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/bin:$PATH" ;;
+        darwin) export PATH="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/CMake.app/Contents/bin:$PATH" ;;
+    esac
+
+    step "handle required"
+    if [ "$DEBUG" = 'true' ] ; then
+        echo
+        echo "REQUIRED=$REQUIRED"
+        echo "OPTIONAL=$OPTIONAL"
+    fi
+    for item in $REQUIRED
+    do
+        REQUIRED_ITEM_INDEX=$(expr ${REQUIRED_ITEM_INDEX-0} + 1)
+        __handle_required_item $(__decode "$item")
+    done
+    unset REQUIRED_ITEM_INDEX
+
+
+    step "list required"
+    if [ -z "$REQUIRED" ] ; then
+        warn "no required."
+    else
+        printf "%-7s %-11s %-10s %-10s %s\n" TYPE NAME EXPECTED ACTUAL LOCATION
+        for item in $REQUIRED
+        do
+            REQUIRED_ITEM_INDEX=$(expr ${REQUIRED_ITEM_INDEX-0} + 1)
+            __print_required_or_optional_item $(__decode "$item")
+        done
+        unset REQUIRED_ITEM_INDEX
+    fi
+
+
+    step "list optional"
+    if [ -z "$OPTIONAL" ] ; then
+        warn "no optional."
+    else
+        printf "%-7s %-11s %-10s %-10s %s\n" TYPE NAME EXPECTED ACTUAL LOCATION
+        for item in $OPTIONAL
+        do
+            OPTIONAL_ITEM_INDEX=$(expr ${OPTIONAL_ITEM_INDEX-0} + 1)
+            __print_required_or_optional_item $(__decode "$item")
+        done
+        unset OPTIONAL_ITEM_INDEX
     fi
 
     eval "perform_$1 $(shiftn 1 $@)"
