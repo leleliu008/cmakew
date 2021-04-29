@@ -1423,7 +1423,7 @@ main() {
     echo
 
     case $1 in
-        -h|--help)
+        ''|-h|--help)
         cat <<EOF
 ./cmakew config  [option]...   -- generate config cache
 ./cmakew build   [option]...   -- build configed
@@ -1462,30 +1462,28 @@ EOF
 
     unset RC_FILE
 
-    case $1 in
-        '') ;;
-        -x|-d|--rc-file=*)
-            for item in $@
-            do
-                case $item in
-                    -x) set -x ;;
-                    -d) DEBUG=true ;;
-                    --rc-file=*)
-                        RC_FILE=$(echo "$item" | cut -d= -f2)
-                        if [ -z "$RC_FILE" ] ; then
-                            die "--rc-file=FILE FILE must not empty."
-                        else
-                            if ! exists file "$RC_FILE" ; then
-                                die "$item: file not exists."
-                            fi
-                        fi
-                        ;;
-                    *)  die "$item: not support argument."
-                esac
-            done
-            ;;
-        *)  die "$1: not support argument."
-    esac
+    unset ACTION
+
+    ACTION="$1"
+
+    shift
+
+    for item in $@
+    do
+        case $item in
+            -x) set -x ;;
+            -d) DEBUG=true ;;
+            --rc-file=*)
+                RC_FILE=$(getvalue "$item")
+                if [ -z "$RC_FILE" ] ; then
+                    die "--rc-file=FILE FILE must not empty."
+                else
+                    die_if_file_is_not_exist "$RC_FILE"
+                fi
+                ;;
+            *)  die "$item: not support argument."
+        esac
+    done
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
