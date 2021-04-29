@@ -409,6 +409,7 @@ os() {
         printf "current-machine-os-name : %s\n" "$(os name)"
         printf "current-machine-os-vers : %s\n" "$(os version)"
         printf "current-machine-os-arch : %s\n" "$(os arch)"
+        printf "current-machine-os-libc : %s\n" "$(os libc)"
     elif [ $# -eq 1 ] ; then
         case $1 in
             -h|--help)
@@ -418,13 +419,12 @@ os -V | --version
 os kind
 os type
 os arch
+os libc
 os name
 os version
 EOF
                 ;;
-            -V|--version)
-                printf "%s\n" '2021.03.28.23'
-                ;;
+            -V|--version) echo '2021.03.28.23' ;;
             kind)
                 case $(uname | tr A-Z a-z) in
                     msys*)    echo "windows" ;;
@@ -465,6 +465,27 @@ EOF
                 __get_os_arch_from_arch  ||
                 __get_os_arch_from_getprop
                 ;;
+            libc)
+                case $(os kind) in
+                    linux)
+                        if command -v getconf > /dev/null ; then
+                            if getconf GNU_LIBC_VERSION > /dev/null 2>&1 ; then
+                                echo glibc
+                                return 0
+                            fi
+                        fi
+                        if command -v ldd > /dev/null ; then
+                            if ldd --version | head -n 1 2>&1 | grep -q GLIBC ; then
+                                echo glibc
+                                return 0
+                            fi
+                            if ldd --version | head -n 1 2>&1 | grep -q musl ; then
+                                echo musl
+                                return 0
+                            fi
+                        fi
+                        return 1
+                esac
             version)
                 case $(os kind) in
                     freebsd) freebsd-version ;;
@@ -1273,6 +1294,8 @@ optional() {
     fi
 }
 
+######################################################################
+
 __fetch_cmake_binary_archive_if_needed() {
     CMAKE_BINARY_ARCHIVE_CACHED_DIR="$HOME/.cmakew"
     CMAKE_BINARY_ARCHIVE_UNPACK_DIR="$CMAKE_BINARY_ARCHIVE_CACHED_DIR/unpack"
@@ -1309,6 +1332,8 @@ __fetch_cmake_binary_archive_if_needed() {
         run tar xf "$CMAKE_BINARY_ARCHIVE_FILEPATH" -C "$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1 || return 1
     fi
 }
+
+##################################################################
 
 perform_config() {
     title 'perform cmakew config'
@@ -1454,6 +1479,7 @@ EOF
     unset NATIVE_OS_NAME
     unset NATIVE_OS_VERS
     unset NATIVE_OS_ARCH
+    unset NATIVE_OS_LIBC
 
     unset CMAKE_VERSION_MREQUIRED
 
@@ -1470,11 +1496,13 @@ EOF
     NATIVE_OS_NAME=$(os name)
     NATIVE_OS_VERS=$(os version)
     NATIVE_OS_ARCH=$(os arch)
+    NATIVE_OS_LIBC=$(os libc)
     echo "NATIVE_OS_KIND  = $NATIVE_OS_KIND"
     echo "NATIVE_OS_TYPE  = $NATIVE_OS_TYPE"
     echo "NATIVE_OS_NAME  = $NATIVE_OS_NAME"
     echo "NATIVE_OS_VERS  = $NATIVE_OS_VERS"
     echo "NATIVE_OS_ARCH  = $NATIVE_OS_ARCH"
+    echo "NATIVE_OS_LIBC  = $NATIVE_OS_LIBC"
 
     if [ "$NATIVE_OS_KIND" != 'windows' ] ; then
         [ "$(whoami)" = root ] || sudo=sudo
@@ -1509,9 +1537,14 @@ EOF
         else
             case $NATIVE_OS_KIND in
             linux)
-                warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
+                if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
+                    warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. we will install it via package manager"
+                    __install_command_via_available_package_manager cmake
+                else
+                    warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
                 we will download prebuild binary from download.cmake.com"
-                __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1 ;;
+                    __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1 ;;
+                fi
             darwin)
                 warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
                 we will download prebuild binary from download.cmake.com"
@@ -1523,24 +1556,20 @@ EOF
     else
         case $NATIVE_OS_KIND in
             linux)
-                warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
-                __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1 ;;
+                if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
+                    warn "cmake not exists. we will install it via package manager"
+                    __install_command_via_available_package_manager cmake
+                else
+                    warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
+                    __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
+                fi
+                ;
             darwin)
                 warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
                 __fetch_cmake_binary_archive_if_needed macos universal         || return 1 ;;
             *)  warn "cmake not exists. we will install it via package manager"
                 __install_command_via_available_package_manager cmake
         esac
-    fi
-
-    [ -z "$1" ] && return 0
-
-    if [ -d "$HOME/.cmakew/unpack/bin" ] ; then
-       export PATH="$HOME/.cmakew/unpack/bin:$PATH"
-    fi
-
-    if [ -d "$HOME/.cmakew/unpack/CMake.app/Contents/bin" ] ; then
-        export PATH="$HOME/.cmakew/unpack/CMake.app/Contents/bin:$PATH"
     fi
 
     eval "perform_$1 $(shiftn 1 $@)"
