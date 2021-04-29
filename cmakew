@@ -1462,29 +1462,6 @@ EOF
 
     unset RC_FILE
 
-    unset ACTION
-
-    ACTION="$1"
-
-    shift
-
-    for item in $@
-    do
-        case $item in
-            -x) set -x ;;
-            -d) DEBUG=true ;;
-            --rc-file=*)
-                RC_FILE=$(getvalue "$item")
-                if [ -z "$RC_FILE" ] ; then
-                    die "--rc-file=FILE FILE must not empty."
-                else
-                    die_if_file_is_not_exist "$RC_FILE"
-                fi
-                ;;
-            *)  die "$item: not support argument."
-        esac
-    done
-
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
     title "current machine os info"
