@@ -1537,22 +1537,24 @@ EOF
             echo "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}"
         else
             case $NATIVE_OS_KIND in
-            linux)
-                if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
-                    warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. we will install it via package manager"
-                    __install_command_via_available_package_manager cmake
-                else
+                linux)
+                    if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
+                        warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. we will install it via package manager"
+                        __install_command_via_available_package_manager cmake
+                    else
+                        warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
+                    we will download prebuild binary from download.cmake.com"
+                        __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
+                    fi
+                    ;;
+                darwin)
                     warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
-                we will download prebuild binary from download.cmake.com"
-                    __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1 ;;
-                fi
-            darwin)
-                warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. 
-                we will download prebuild binary from download.cmake.com"
-                __fetch_cmake_binary_archive_if_needed macos universal         || return 1 ;;
-            *)  warn "cmake not exists. we will install it via package manager"
-                __install_command_via_available_package_manager cmake
-        esac
+                    we will download prebuild binary from download.cmake.com"
+                    __fetch_cmake_binary_archive_if_needed macos universal         || return 1
+                    ;;
+                *)  warn "cmake not exists. we will install it via package manager"
+                    __install_command_via_available_package_manager cmake
+            esac
         fi
     else
         case $NATIVE_OS_KIND in
@@ -1564,10 +1566,11 @@ EOF
                     warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
                     __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
                 fi
-                ;
+                ;;
             darwin)
                 warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
-                __fetch_cmake_binary_archive_if_needed macos universal         || return 1 ;;
+                __fetch_cmake_binary_archive_if_needed macos universal         || return 1
+                ;;
             *)  warn "cmake not exists. we will install it via package manager"
                 __install_command_via_available_package_manager cmake
         esac
