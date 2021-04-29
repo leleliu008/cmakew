@@ -476,11 +476,11 @@ EOF
                             fi
                         fi
                         if command -v ldd > /dev/null ; then
-                            if ldd --version | head -n 1 2>&1 | grep -q GLIBC ; then
+                            if ldd --version 2>&1 | head -n 1 | grep -q GLIBC ; then
                                 echo glibc
                                 return 0
                             fi
-                            if ldd --version | head -n 1 2>&1 | grep -q musl ; then
+                            if ldd --version 2>&1 | head -n 1 | grep -q musl ; then
                                 echo musl
                                 return 0
                             fi
@@ -1459,7 +1459,6 @@ perform_clean() {
 
 main() {
     echo "${COLOR_GREEN}cmake wrapper is desinged to help you using cmake easily.${COLOR_OFF}"
-    echo
 
     case $1 in
         ''|-h|--help)
