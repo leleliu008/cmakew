@@ -1117,54 +1117,67 @@ __install_command_via_available_package_manager() {
 __install_command_via_fetch_prebuild_binary() {
     print "🔥  ${COLOR_YELLOW}required command${COLOR_OFF} ${COLOR_GREEN}$(shiftn 1 $@)${COLOR_OFF}${COLOR_YELLOW}, but${COLOR_OFF} ${COLOR_GREEN}$2${COLOR_OFF} ${COLOR_YELLOW}command not found, try to install it via${COLOR_OFF} ${COLOR_GREEN}fetch prebuild binary${COLOR_OFF}\n"
 
-    BINARY_ARCHIVE_FILENAME=$(basename "$1")
-    BINARY_ARCHIVE_FILEPATH="$BINARY_ARCHIVE_CACHED_DIR/$BINARY_ARCHIVE_FILENAME"
+    unset PREBUILD_BINARY_FILENAME
+    unset PREBUILD_BINARY_FILEPATH
 
-    if [ -d    "$BINARY_ARCHIVE_UNPACK_DIR" ] ; then
-        rm -rf "$BINARY_ARCHIVE_UNPACK_DIR" || return 1
+    PREBUILD_BINARY_FILENAME=$(basename "$1")
+    PREBUILD_BINARY_FILEPATH="$PREBUILD_BINARY_CACHED_DIR/$PREBUILD_BINARY_FILENAME"
+
+    if [ -d    "$PREBUILD_BINARY_UNPACK_DIR/$2" ] ; then
+        rm -rf "$PREBUILD_BINARY_UNPACK_DIR/$2" || return 1
     fi
 
-    if [ ! -f "$BINARY_ARCHIVE_FILEPATH" ] ; then
-        run fetch "$1" --output-dir="$BINARY_ARCHIVE_CACHED_DIR" --output-name="$BINARY_ARCHIVE_FILENAME" || return 1
+    if [ ! -f "$PREBUILD_BINARY_FILEPATH" ] ; then
+        run fetch "$1" --output-dir="$PREBUILD_BINARY_CACHED_DIR" --output-name="$PREBUILD_BINARY_FILENAME" || return 1
     fi
 
-    run install -d "$BINARY_ARCHIVE_UNPACK_DIR" || return 1
+    run install -d "$PREBUILD_BINARY_UNPACK_DIR/$2" || return 1
 
     case $1 in
         *.zip)
             __handle_required_item required command unzip &&
-            run unzip "$BINARY_ARCHIVE_FILEPATH" -d "$BINARY_ARCHIVE_UNPACK_DIR"
+            run unzip "$PREBUILD_BINARY_FILEPATH" -d "$PREBUILD_BINARY_UNPACK_DIR/$2"
             ;;
         *.tar.xz)
             __handle_required_item required command tar  &&
             __handle_required_item required command xz   &&
-            run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
             ;;
         *.tar.gz)
             __handle_required_item required command tar  &&
             __handle_required_item required command gzip &&
-            run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
             ;;
         *.tar.lz)
             __handle_required_item required command tar  &&
             __handle_required_item required command lzip &&
-            run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
             ;;
         *.tar.bz2)
             __handle_required_item required command tar   &&
             __handle_required_item required command bzip2 &&
-            run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
             ;;
         *.tgz)
             __handle_required_item required command tar  &&
             __handle_required_item required command gzip &&
-            run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
             ;;
         *.txz)
             __handle_required_item required command tar &&
             __handle_required_item required command xz  &&
-            run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
     esac
+
+    if [ -d "$PREBUILD_BINARY_UNPACK_DIR/$2/bin" ] ; then
+        export PATH="$PREBUILD_BINARY_UNPACK_DIR/$2/bin:$PATH"
+    fi
+    if [ "$NATIVE_OS_KIND" = 'darwin' ] ; then
+        for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -d 4 -type d -name bin)
+        do
+            export PATH="$item:$PATH"
+        done
+    fi
 }
 
 # examples:
@@ -1502,12 +1515,17 @@ main() {
     case $1 in
         ''|-h|--help)
         cat <<EOF
-./cmakew config  [option]...   -- generate config cache
-./cmakew build   [option]...   -- build configed
-./cmakew install [option]...   -- install prebuild to destination
-./cmakew pack    [option]...   -- pack source and binary archive
-./cmakew test    [option]...   -- run tests
-./cmakew clean                 -- remove build dir
+
+Usage:
+./cmakew -h | --help             -- show help    of this command
+./cmakew -V | --version          -- show version of this command
+
+./cmakew [ -x | -d | -rc-file=FILE ] config  [option]...   -- generate config cache
+./cmakew [ -x | -d | -rc-file=FILE ] build   [option]...   -- build configed
+./cmakew [ -x | -d | -rc-file=FILE ] install [option]...   -- install prebuild to destination
+./cmakew [ -x | -d | -rc-file=FILE ] pack    [option]...   -- pack source and binary archive
+./cmakew [ -x | -d | -rc-file=FILE ] test    [option]...   -- run tests
+./cmakew [ -x | -d | -rc-file=FILE ] clean                 -- remove build dir
 EOF
         return 0
         ;;
@@ -1539,6 +1557,28 @@ EOF
     unset OPTIONAL_ITEM_INDEX
 
     unset RC_FILE
+
+    unset ACTION
+
+    for item in $@
+    do
+        case $item in
+            -x) shift; set -x ;;
+            -d) shift; DEBUG=true ;;
+            --rc-file=*)
+                shift
+                RC_FILE=$(echo "$item" | cut -d= -f2)
+                if [ -z "$RC_FILE" ] ; then
+                    die "--rc-file=FILE FILE must not empty."
+                else
+                    if ! exists file "$RC_FILE" ; then
+                        die "$item: file not exists."
+                    fi
+                fi
+                ;;
+            *)  shift; ACTION="$item"; break
+        esac
+    done
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
@@ -1599,13 +1639,30 @@ EOF
         required command cmake ge "$CMAKE_VERSION_MREQUIRED"
     fi
 
-    BINARY_ARCHIVE_CACHED_DIR="$HOME/.cmakew"
-    BINARY_ARCHIVE_UNPACK_DIR="$BINARY_ARCHIVE_CACHED_DIR/unpack"
+    PREBUILD_BINARY_CACHED_DIR="$HOME/.cmakew"
+    PREBUILD_BINARY_UNPACK_DIR="$PREBUILD_BINARY_CACHED_DIR/unpack"
 
-    case $NATIVE_OS_KIND in
-        linux)  export PATH="$BINARY_ARCHIVE_UNPACK_DIR/bin:$PATH" ;;
-        darwin) export PATH="$BINARY_ARCHIVE_UNPACK_DIR/CMake.app/Contents/bin:$PATH" ;;
-    esac
+    if [ -d "$PREBUILD_BINARY_UNPACK_DIR" ] ; then
+        for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -d 2 -type d -name bin)
+        do
+            export PATH="$item:$PATH"
+        done
+
+        if [ "$NATIVE_OS_KIND" = 'darwin' ] ; then
+            for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -d 4 -type d -name bin)
+            do
+                export PATH="$item:$PATH"
+            done
+        fi
+    fi
+
+    if [ "$DEBUG" = 'true' ] ; then
+        echo "\nPATH:"
+        for item in $(echo "$PATH" | tr ' ' '|' | tr ':' ' ')
+        do
+            echo "    $item" | tr '|' ' '
+        done
+    fi
 
     step "handle required"
     if [ "$DEBUG" = 'true' ] ; then
@@ -1648,7 +1705,7 @@ EOF
         unset OPTIONAL_ITEM_INDEX
     fi
 
-    eval "perform_$1 $(shiftn 1 $@)"
+    eval "perform_$ACTION $@"
 }
 
 main $@
