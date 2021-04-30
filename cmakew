@@ -1121,7 +1121,7 @@ __install_command_via_fetch_prebuild_binary() {
     fi
 
     if [ ! -f "$BINARY_ARCHIVE_FILEPATH" ] ; then
-        fetch "$1" --output-dir="$BINARY_ARCHIVE_CACHED_DIR" --output-name="$BINARY_ARCHIVE_FILENAME" || return 1
+        run fetch "$1" --output-dir="$BINARY_ARCHIVE_CACHED_DIR" --output-name="$BINARY_ARCHIVE_FILENAME" || return 1
     fi
 
     run install -d "$BINARY_ARCHIVE_UNPACK_DIR" || return 1
@@ -1193,11 +1193,12 @@ __install_command() {
     if required_command_exists_and_version_matched $@ ; then
         printf "command %-10s %-10s ${COLOR_GREEN}FOUND${COLOR_OFF} %-8s %s\n" "$1" "$2 $3" "$(version_of_command $1)" "$(command -v $1)"
     else
-        FETCH_URL=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
-        if [ -z "$FETCH_URL" ] ; then
+        unset PREBUILD_BINARY_FETCH_URL
+        PREBUILD_BINARY_FETCH_URL=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
+        if [ -z "$PREBUILD_BINARY_FETCH_URL" ] ; then
             __install_command_via_available_package_manager $@
         else
-            __install_command_via_fetch_prebuild_binary "$FETCH_URL" $@
+            __install_command_via_fetch_prebuild_binary "$PREBUILD_BINARY_FETCH_URL" $@
         fi
     fi
 }
