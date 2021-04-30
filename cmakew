@@ -164,7 +164,7 @@ __fetch_archive_via_tools() {
     AVAILABLE_FETCH_TOOL=$(__get_available_fetch_tool)
 
     if [ -z "$AVAILABLE_FETCH_TOOL" ] ; then
-        __handle_required_item required curl || return 1
+        __handle_required_item required command curl || return 1
         if exists command curl ; then
             AVAILABLE_FETCH_TOOL=curl
         else
@@ -1128,37 +1128,37 @@ __install_command_via_fetch_prebuild_binary() {
 
     case $1 in
         *.zip)
-            __handle_required_item required unzip &&
+            __handle_required_item required command unzip &&
             run unzip "$BINARY_ARCHIVE_FILEPATH" -d "$BINARY_ARCHIVE_UNPACK_DIR"
             ;;
         *.tar.xz)
-            __handle_required_item required tar  &&
-            __handle_required_item required xz   &&
+            __handle_required_item required command tar  &&
+            __handle_required_item required command xz   &&
             run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
             ;;
         *.tar.gz)
-            __handle_required_item required tar  &&
-            __handle_required_item required gzip &&
+            __handle_required_item required command tar  &&
+            __handle_required_item required command gzip &&
             run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
             ;;
         *.tar.lz)
-            __handle_required_item required tar  &&
-            __handle_required_item required lzip &&
+            __handle_required_item required command tar  &&
+            __handle_required_item required command lzip &&
             run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
             ;;
         *.tar.bz2)
-            __handle_required_item required tar   &&
-            __handle_required_item required bzip2 &&
+            __handle_required_item required command tar   &&
+            __handle_required_item required command bzip2 &&
             run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
             ;;
         *.tgz)
-            __handle_required_item required tar  &&
-            __handle_required_item required gzip &&
+            __handle_required_item required command tar  &&
+            __handle_required_item required command gzip &&
             run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
             ;;
         *.txz)
-            __handle_required_item required tar &&
-            __handle_required_item required xz  &&
+            __handle_required_item required command tar &&
+            __handle_required_item required command xz  &&
             run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1
     esac
 }
