@@ -623,10 +623,15 @@ version_minor_of_version() {
 version_sort() {
     # https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sort.html
     # https://man.netbsd.org/NetBSD-8.1/i386/sort.1
-    case $(uname) in
-        NetBSD) echo "$@" | tr ' ' '\n' | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4 ;;
-             *) echo "$@" | tr ' ' '\n' | sort -V ;;
-    esac
+    #
+    # sort: unrecognized option: V
+    # BusyBox v1.29.3 (2019-01-24 07:45:07 UTC) multi-call binary.
+    # Usage: sort [-nrugMcszbdfiokt] [-o FILE] [-k start[.offset][opts][,end[.offset][opts]] [-t CHAR] [FILE]...
+    if  echo | (sort -V 2> /dev/null) ; then
+        echo "$@" | tr ' ' '\n' | sort -V
+    else
+        echo "$@" | tr ' ' '\n' | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4
+    fi
 }
 
 # check if match the condition
@@ -1103,6 +1108,66 @@ __install_command_via_available_package_manager() {
 }
 
 # examples:
+# URL pkg-config ge 0.18
+# URL python3    ge 3.5
+# URL make
+__install_command_via_fetch_prebuild_binary() {
+    print "🔥  ${COLOR_YELLOW}required command${COLOR_OFF} ${COLOR_GREEN}$(shiftn 1 $@)${COLOR_OFF}${COLOR_YELLOW}, but${COLOR_OFF} ${COLOR_GREEN}$2${COLOR_OFF} ${COLOR_YELLOW}command not found, try to fetch prebuild binary from${COLOR_OFF} ${COLOR_GREEN}$1${COLOR_OFF}\n"
+
+    BINARY_ARCHIVE_FILENAME=$(basename "$1")
+    BINARY_ARCHIVE_FILEPATH="$BINARY_ARCHIVE_CACHED_DIR/$BINARY_ARCHIVE_FILENAME"
+
+    if [ -d    "$BINARY_ARCHIVE_UNPACK_DIR" ] ; then
+        rm -rf "$BINARY_ARCHIVE_UNPACK_DIR" || return 1
+    fi
+
+    if [ ! -f "$BINARY_ARCHIVE_FILEPATH" ] ; then
+        fetch "$1" --output-dir="$BINARY_ARCHIVE_CACHED_DIR" --output-name="$BINARY_ARCHIVE_FILENAME" || return 1
+    fi
+    run install -d "$BINARY_ARCHIVE_UNPACK_DIR" || return 1 
+    run tar xf "$BINARY_ARCHIVE_FILEPATH" -C "$BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1 || return 1
+}
+
+# examples:
+# pkg-config ge 0.18
+# python3    ge 3.5
+# make
+__install_command() {
+    if required_command_exists_and_version_matched $@ ; then
+        printf "command %-10s %-10s ${COLOR_GREEN}FOUND${COLOR_OFF} %-8s %s\n" "$1" "$2 $3" "$(version_of_command $1)" "$(command -v $1)"
+    else
+        FETCH_URL=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
+        if [ -z "$FETCH_URL" ] ; then
+            __install_command_via_available_package_manager $@
+        else
+            __install_command_via_fetch_prebuild_binary "$FETCH_URL" $@
+        fi
+    fi
+}
+
+# examples:
+# pkg-config ge 0.18
+# python3    ge 3.5
+# make
+__get_prebuild_binary_fetch_url_by_command_name() {
+    case $1 in
+        cmake)
+            case $NATIVE_OS_KIND in
+                linux)
+                    if [ "$NATIVE_OS_LIBC" = 'glibc' ] ; then
+                        # https://cmake.org/download
+                        echo "https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2-linux-x86_64.tar.gz"
+                    fi
+                    ;;
+                darwin)
+                    if ! exists command brew ; then
+                        echo "https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2-macos-universal.tar.gz"
+                    fi
+            esac
+    esac
+}
+
+# examples:
 # pkg-config ge 0.18
 # python3    ge 3.5
 # make
@@ -1273,78 +1338,6 @@ optional() {
         fi
     else
         die "optional $@ : optional function accept 2 or 4 argument."
-    fi
-}
-
-######################################################################
-
-__xxx() {
-    if exists command cmake ; then
-        if command_version_match cmake ge "$CMAKE_VERSION_MREQUIRED" ; then
-            echo "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}"
-        else
-            case $NATIVE_OS_KIND in
-                linux)
-                    if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
-                        warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}. we will install it via package manager"
-                        __install_command_via_available_package_manager cmake
-                    else
-                        warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}.
-                    we will download prebuild binary from download.cmake.com"
-                        __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
-                    fi
-                    ;;
-                darwin)
-                    warn "cmake already have been installed as ${COLOR_GREEN}$(command -v cmake) $(version_of_command cmake)${COLOR_OFF}, but this project need ${COLOR_GREEN}ge $CMAKE_VERSION_MREQUIRED${COLOR_OFF}.
-                    we will download prebuild binary from download.cmake.com"
-                    __fetch_cmake_binary_archive_if_needed macos universal         || return 1
-                    ;;
-                *)  warn "cmake not exists. we will install it via package manager"
-                    __install_command_via_available_package_manager cmake
-            esac
-        fi
-    else
-        case $NATIVE_OS_KIND in
-            linux)
-                if [ "$NATIVE_OS_LIBC" = 'musl' ] ; then
-                    warn "cmake not exists. we will install it via package manager"
-                    __install_command_via_available_package_manager cmake
-                else
-                    warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
-                    __fetch_cmake_binary_archive_if_needed linux "$NATIVE_OS_ARCH" || return 1
-                fi
-                ;;
-            darwin)
-                warn "cmake not exists. we will download prebuild binary from ${COLOR_GREEN}https://cmake.org/download/${COLOR_OFF}"
-                __fetch_cmake_binary_archive_if_needed macos universal         || return 1
-                ;;
-            *)  warn "cmake not exists. we will install it via package manager"
-                __install_command_via_available_package_manager cmake
-        esac
-    fi
-}
-
-__fetch_cmake_binary_archive_if_needed() {
-    CMAKE_BINARY_VERSION="3.20.1"
-     
-    # https://cmake.org/download
-    CMAKE_BINARY_ARCHIVE_URL="https://github.com/Kitware/CMake/releases/download/v$CMAKE_BINARY_VERSION/cmake-$CMAKE_BINARY_VERSION-$1-$2.tar.gz"
-
-    CMAKE_BINARY_ARCHIVE_FILENAME=$(basename $CMAKE_BINARY_ARCHIVE_URL)
-    CMAKE_BINARY_ARCHIVE_FILEPATH="$CMAKE_BINARY_ARCHIVE_CACHED_DIR/$CMAKE_BINARY_ARCHIVE_FILENAME"
-    
-    if [ -f "$CMAKE_COMMAND" ] && [ -x "$CMAKE_COMMAND" ] && "$CMAKE_COMMAND" --version > /dev/null 2>&1 ; then
-        :
-    else
-        if [ -d    "$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" ] ; then
-            rm -rf "$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" || return 1
-        fi
-
-        if [ ! -f "$CMAKE_BINARY_ARCHIVE_FILEPATH" ] ; then
-           fetch "$CMAKE_BINARY_ARCHIVE_URL" --output-dir="$CMAKE_BINARY_ARCHIVE_CACHED_DIR" --output-name="$CMAKE_BINARY_ARCHIVE_FILENAME" || return 1
-        fi
-        run install -d "$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" || return 1 
-        run tar xf "$CMAKE_BINARY_ARCHIVE_FILEPATH" -C "$CMAKE_BINARY_ARCHIVE_UNPACK_DIR" --strip-components 1 || return 1
     fi
 }
 
@@ -1560,12 +1553,12 @@ EOF
         required command cmake ge "$CMAKE_VERSION_MREQUIRED"
     fi
 
-    CMAKE_BINARY_ARCHIVE_CACHED_DIR="$HOME/.cmakew"
-    CMAKE_BINARY_ARCHIVE_UNPACK_DIR="$CMAKE_BINARY_ARCHIVE_CACHED_DIR/unpack"
+    BINARY_ARCHIVE_CACHED_DIR="$HOME/.cmakew"
+    BINARY_ARCHIVE_UNPACK_DIR="$BINARY_ARCHIVE_CACHED_DIR/unpack"
 
     case $NATIVE_OS_KIND in
-        linux)  export PATH="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/bin:$PATH" ;;
-        darwin) export PATH="$CMAKE_BINARY_ARCHIVE_UNPACK_DIR/CMake.app/Contents/bin:$PATH" ;;
+        linux)  export PATH="$BINARY_ARCHIVE_UNPACK_DIR/bin:$PATH" ;;
+        darwin) export PATH="$BINARY_ARCHIVE_UNPACK_DIR/CMake.app/Contents/bin:$PATH" ;;
     esac
 
     step "handle required"

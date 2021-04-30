@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - run: dnf --nogpgcheck -y update
-      - run: dnf --nogpgcheck -y install git file
+      - run: dnf --nogpgcheck -y install git patch file
 
       - uses: actions/checkout@v2
 
