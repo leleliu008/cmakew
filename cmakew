@@ -1419,9 +1419,7 @@ perform_config() {
     fi
 
     if [ -z "$GENERATOR" ] || [ "$GENERATOR" = 'Unix Makefiles' ] ; then
-        if ! exists command make ; then
-            __install_command make
-        fi
+        __handle_required_item required command make
     fi
 
     if run cmake $CMAKE_FLAGS ; then
