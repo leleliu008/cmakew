@@ -820,9 +820,13 @@ get_emerge_package_name_by_command_name() {
 
 __get_pacman_package_name_by_command_name() {
     case $1 in
-      cc|gcc) echo 'gcc' ;;
-         gm4) echo 'm4'    ;;
-       gperf) echo 'gperf' ;;
+        cc|gcc)
+            case $NATIVE_OS_TYPE in
+                mingw32|mingw64) echo 'toolchain' ;;
+                *)               echo 'gcc'
+            esac
+            ;;
+        gm4)  echo 'm4'       ;;
         gsed) echo 'gnu-sed'  ;;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
@@ -1433,6 +1437,7 @@ perform_config() {
         printf "%s" "BUILD_DIR='$BUILD_DIR'" > "$PROJECT_DIR/.cmakew"
     else
         rm -f "$PROJECT_DIR/.cmakew"
+        return 1
     fi
 }
 

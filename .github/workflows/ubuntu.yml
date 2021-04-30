@@ -10,6 +10,7 @@ jobs:
   test:
 
     strategy:
+      fail-fast: false
       matrix:
         version: [16.04, 18.04, 20.04]
 
