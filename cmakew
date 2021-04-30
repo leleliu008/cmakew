@@ -1418,7 +1418,14 @@ perform_config() {
             -B build.d"
     fi
 
-    if [ -z "$GENERATOR" ] || [ "$GENERATOR" = 'Unix Makefiles' ] ; then
+    if [ -z "$GENERATOR" ] ; then
+        GENERATOR='Unix Makefiles'
+        if [ "$NATIVE_OS_KIND" = 'windows' ] ; then
+            CMAKE_FLAGS="$CMAKE_FLAGS -G 'Unix Makefiles'"
+        fi
+    fi
+
+    if [ "$GENERATOR" = 'Unix Makefiles' ] ; then
         __handle_required_item required command make
     fi
 
