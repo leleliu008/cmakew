@@ -1,7 +1,8 @@
 # try to find libxml/*.h API, once done this will define
 #
 # LIBXML2_FOUND        - system has libxml2
-# LIBXML2_INCLUDE_DIRS - the libxml2 include directory  and it's dependencies's include directory
+# LIBXML2_INCLUDE_DIRS - the header dir of libxml2       and it's dependencies's include directory
+# LIBXML2_LIBRARY_PATH - the filepath of libxml2 library
 # LIBXML2_LIBRARY_LIST - the filepath of libxml2 library and it's dependencies's library
 # LIBXML2_VERSION      - the version  of libxml2 library
 
@@ -21,14 +22,32 @@ else()
     message("PKG_CONFIG_LIBXML2_LDFLAGS_OTHER=${PKG_CONFIG_LIBXML2_LDFLAGS_OTHER}")
     message("PKG_CONFIG_LIBXML2_STATIC_LIBRARIES=${PKG_CONFIG_LIBXML2_STATIC_LIBRARIES}")
 
+    set(LIBXML2_INCLUDE_DIR)
+    set(LIBXML2_LIBRARY)
+
+    set(LIBXML2_INCLUDE_DIRS)
+    set(LIBXML2_LIBRARY_LIST)
+
     if (ENABLE_STATIC)
         if (PKG_CONFIG_LIBXML2_FOUND)
             foreach (item ${PKG_CONFIG_LIBXML2_STATIC_LIBRARIES})
                 if  (item STREQUAL "xml2")
-                    find_path   (LIBXML2_INCLUDE_DIRS libxml/SAX2.h  HINTS ${PKG_CONFIG_LIBXML2_INCLUDE_DIRS})
-                    find_library(LIBXML2_LIBRARY_LIST libxml2.a xml2 HINTS ${PKG_CONFIG_LIBXML2_LIBRARY_DIRS})
+                    find_path   (LIBXML2_INCLUDE_DIR libxml/SAX2.h  HINTS ${PKG_CONFIG_LIBXML2_INCLUDE_DIRS})
+                    find_library(LIBXML2_LIBRARY     libxml2.a xml2 HINTS ${PKG_CONFIG_LIBXML2_LIBRARY_DIRS})
+                    list(APPEND LIBXML2_INCLUDE_DIRS ${LIBXML2_INCLUDE_DIR})
+                    list(APPEND LIBXML2_LIBRARY_LIST ${LIBXML2_LIBRARY})
                 elseif (item STREQUAL "m")
-                    list(APPEND LIBXML2_LIBRARY_LIST -lm)
+                    if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+                        set(LIBM_FOUND 1)
+                        set(HAVE_LIBM  1)
+                    else()
+                        find_package(LibM)
+                        if (LIBM_FOUND)
+                            set(HAVE_LIBM 1)
+                            list(APPEND LIBXML2_INCLUDE_DIRS ${LIBM_INCLUDE_DIR})
+                            list(APPEND LIBXML2_LIBRARY_LIST ${LIBM_LIBRARY})
+                        endif()
+                    endif()
                 elseif (item STREQUAL "z")
                     find_package(LibZ)
                     if (LIBZ_FOUND)
@@ -52,9 +71,15 @@ else()
                     endif()
                 elseif (item STREQUAL "pthread")
                     if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-                        message("for Android System")
+                        set(PTHREAD_FOUND 1)
+                        set(HAVE_PTHREAD 1)
                     else()
-                        list(APPEND LIBXML2_LIBRARY_LIST -lpthread)
+                        find_package(Pthread)
+                        if (PTHREAD_FOUND)
+                            set(HAVE_PTHREAD 1)
+                            list(APPEND LIBXML2_INCLUDE_DIRS ${PTHREAD_INCLUDE_DIR})
+                            list(APPEND LIBXML2_LIBRARY_LIST ${PTHREAD_LIBRARY})
+                        endif()
                     endif()
                 endif()
             endforeach()
@@ -78,6 +103,6 @@ else()
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibXML2 REQUIRED_VARS LIBXML2_LIBRARY_LIST LIBXML2_INCLUDE_DIRS VERSION_VAR LIBXML2_VERSION)
+find_package_handle_standard_args(LibXML2 REQUIRED_VARS LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR VERSION_VAR LIBXML2_VERSION)
 
 mark_as_advanced(LIBXML2_INCLUDE_DIRS LIBXML2_LIBRARY_LIST)
