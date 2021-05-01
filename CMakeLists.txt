@@ -284,19 +284,19 @@ if (NOT HAVE_REGCOMP)
     target_link_libraries(     libctags         gnu_regex)
 endif()
 
-if (HAVE_LIBZ)
-    target_include_directories(libctags PUBLIC  ${LIBZ_INCLUDE_DIR})
-    target_link_libraries(     libctags         ${LIBZ_LIBRARY})
-endif()
-
-if (HAVE_LIBLZMA)
-    target_include_directories(libctags PUBLIC  ${LIBLZMA_INCLUDE_DIR})
-    target_link_libraries(     libctags         ${LIBLZMA_LIBRARY})
-endif()
-
 if (HAVE_LIBXML)
     target_include_directories(libctags PUBLIC  ${LIBXML2_INCLUDE_DIR})
     target_link_libraries(     libctags         ${LIBXML2_LIBRARY})
+
+    if (HAVE_LIBZ)
+        target_include_directories(libctags PUBLIC  ${LIBZ_INCLUDE_DIR})
+        target_link_libraries(     libctags         ${LIBZ_LIBRARY})
+    endif()
+
+    if (HAVE_LIBLZMA)
+        target_include_directories(libctags PUBLIC  ${LIBLZMA_INCLUDE_DIR})
+        target_link_libraries(     libctags         ${LIBLZMA_LIBRARY})
+    endif()
 endif()
 
 if (HAVE_LIBYAML)
