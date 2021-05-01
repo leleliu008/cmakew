@@ -19,7 +19,7 @@ else()
     #message("PKG_CONFIG_LIBZ_VERSION=${PKG_CONFIG_LIBZ_VERSION}")
      
     if (ENABLE_STATIC)
-        set(LIBZ_LIBRARY_NAMES z libz.a)
+        set(LIBZ_LIBRARY_NAMES libz.a z)
     else()
         set(LIBZ_LIBRARY_NAMES z)
     endif()

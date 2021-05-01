@@ -19,7 +19,7 @@ else()
     #message("PKG_CONFIG_ICONV_VERSION=${PKG_CONFIG_ICONV_VERSION}")
      
     if (ENABLE_STATIC)
-        set(ICONV_LIBRARY_NAMES iconv libiconv.a c)
+        set(ICONV_LIBRARY_NAMES libiconv.a iconv c)
     else()
         set(ICONV_LIBRARY_NAMES iconv libiconv   c)
     endif()

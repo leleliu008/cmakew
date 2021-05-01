@@ -15,7 +15,10 @@ option(ENABLE_STATIC  "if link static libraries."  ON)
 option(ENABLE_XML     "if support XML feature."  ON)
 option(ENABLE_YAML    "if support YAML feature." ON)
 option(ENABLE_JSON    "if support JSON feature." ON)
+
 option(ENABLE_LIBZ    "if use libz."        ON)
+option(ENABLE_LIBLZMA "if use liblzma."     ON)
+
 option(ENABLE_ICONV   "if use iconv.h API." ON)
 option(ENABLE_SECCOMP "if use libseccomp."  ON)
 option(ENABLE_GCOV    "if use gcov."        ON)
@@ -148,6 +151,14 @@ if (ENABLE_LIBZ)
     endif()
 endif()
 
+if (ENABLE_LIBLZMA)
+    find_package(LibLZMA)
+    if (LIBLZMA_FOUND)
+        set(HAVE_LIBLZMA 1)
+    endif()
+endif()
+
+
 if (ENABLE_XML)
     find_package(LibXML2)
     if (LIBXML2_FOUND)
@@ -276,6 +287,11 @@ endif()
 if (HAVE_LIBZ)
     target_include_directories(libctags PUBLIC  ${LIBZ_INCLUDE_DIR})
     target_link_libraries(     libctags         ${LIBZ_LIBRARY})
+endif()
+
+if (HAVE_LIBLZMA)
+    target_include_directories(libctags PUBLIC  ${LIBLZMA_INCLUDE_DIR})
+    target_link_libraries(     libctags         ${LIBLZMA_LIBRARY})
 endif()
 
 if (HAVE_LIBXML)
