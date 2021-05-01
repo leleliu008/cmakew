@@ -1,9 +1,9 @@
-# try to find libm API, once done this will define 
+# try to find libm, once done following variables will be defined
 #
-# LIBM_FOUND       - system has libm 
-# LIBM_INCLUDE_DIR - the libm include directory 
-# LIBM_LIBRARY     - the filepath of libm library
-# LIBM_VERSION     - the version  of libm library
+# LIBM_FOUND       - system has libm
+# LIBM_VERSION     - the version of libm
+# LIBM_INCLUDE_DIR - the libm include directory
+# LIBM_LIBRARY     - the filepath of libm.a|so|dylib
 
 
 if (LIBM_INCLUDE_DIR AND LIBM_LIBRARY)
@@ -41,7 +41,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-    LibM
+    LIBM
     FOUND_VAR LIBM_FOUND
     REQUIRED_VARS LIBM_LIBRARY LIBM_INCLUDE_DIR
     VERSION_VAR LIBM_VERSION

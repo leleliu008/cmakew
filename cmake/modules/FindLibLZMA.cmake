@@ -1,9 +1,13 @@
-# try to find liblzma API, once done this will define 
+# try to find liblzma , once done following variables will be defined
 #
-# LIBLZMA_FOUND       - system has liblzma 
-# LIBLZMA_INCLUDE_DIR - the liblzma include directory 
-# LIBLZMA_LIBRARY     - the filepath of liblzma library
-# LIBLZMA_VERSION     - the version  of liblzma library
+# LIBLZMA_FOUND        - system has liblzma
+# LIBLZMA_VERSION      - the version of liblzma
+#
+# LIBLZMA_INCLUDE_DIR  - the liblzma include directory
+# LIBLZMA_LIBRARY      - the filepath of liblzma library
+#
+# LIBLZMA_INCLUDE_DIRS - the liblzma include directory   and it's dependencies's include directory 
+# LIBLZMA_LIBRARY_LIST - the filepath of liblzma library and it's dependencies's
 
 
 if (LIBLZMA_INCLUDE_DIR AND LIBLZMA_LIBRARY)
@@ -19,22 +23,45 @@ else()
     message("PKG_CONFIG_LIBLZMA_VERSION=${PKG_CONFIG_LIBLZMA_VERSION}")
     message("PKG_CONFIG_LIBLZMA_LIBRARIES=${PKG_CONFIG_LIBLZMA_LIBRARIES}")
     message("PKG_CONFIG_LIBLZMA_STATIC_LIBRARIES=${PKG_CONFIG_LIBLZMA_STATIC_LIBRARIES}")
+
+    set(LIBLZMA_INCLUDE_DIR)
+    set(LIBLZMA_LIBRARY)
+
+    set(LIBLZMA_INCLUDE_DIRS)
+    set(LIBLZMA_LIBRARY_LIST)
      
     if (ENABLE_STATIC)
-        set(LIBLZMA_LIBRARY_NAMES liblzma.a lzma)
+        if (PKG_CONFIG_LIBLZMA_FOUND)
+            foreach(item ${PKG_CONFIG_LIBLZMA_STATIC_LIBRARIES})
+                if (item STREQUAL "lzma")
+                    find_path   (LIBLZMA_INCLUDE_DIR   lzma.h         HINTS ${PKG_CONFIG_LIBLZMA_INCLUDE_DIRS})
+                    find_library(LIBLZMA_LIBRARY NAMES liblzma.a lzma HINTS ${PKG_CONFIG_LIBLZMA_LIBRARY_DIRS})
+                elseif (item STREQUAL "md")
+                    find_package(MD)
+                    if (MD_FOUND)
+                        list(APPEND LIBLZMA_INCLUDE_DIRS ${MD_INCLUDE_DIR})
+                        list(APPEND LIBLZMA_LIBRARY_LIST ${MD_LIBRARY})
+                    endif()
+                endif()
+        endforeach()
+        else()
+            find_path   (LIBLZMA_INCLUDE_DIR   lzma.h)
+            find_library(LIBLZMA_LIBRARY NAMES liblzma.a lzma)
+        endif()
     else()
-        set(LIBLZMA_LIBRARY_NAMES lzma)
+        if (PKG_CONFIG_LIBLZMA_FOUND)
+            find_path   (LIBLZMA_INCLUDE_DIR   lzma.h HINTS ${PKG_CONFIG_LIBLZMA_INCLUDE_DIRS})
+            find_library(LIBLZMA_LIBRARY NAMES lzma   HINTS ${PKG_CONFIG_LIBLZMA_LIBRARY_DIRS})
+        else()
+            find_path   (LIBLZMA_INCLUDE_DIR   lzma.h)
+            find_library(LIBLZMA_LIBRARY NAMES lzma)
+        endif()
     endif()
 
-    if (PKG_CONFIG_LIBLZMA_FOUND)
-        find_path   (LIBLZMA_INCLUDE_DIR   lzma.h                   HINTS ${PKG_CONFIG_LIBLZMA_INCLUDE_DIRS})
-        find_library(LIBLZMA_LIBRARY NAMES ${LIBLZMA_LIBRARY_NAMES} HINTS ${PKG_CONFIG_LIBLZMA_LIBRARY_DIRS})
-    else()
-        find_path   (LIBLZMA_INCLUDE_DIR   lzma.h)
-        find_library(LIBLZMA_LIBRARY NAMES ${LIBLZMA_LIBRARY_NAMES})
-    endif()
 
     if (LIBLZMA_INCLUDE_DIR AND LIBLZMA_LIBRARY)
+        list(APPEND LIBLZMA_INCLUDE_DIRS ${LIBLZMA_INCLUDE_DIR})
+        list(APPEND LIBLZMA_LIBRARY_LIST ${LIBLZMA_LIBRARY})
         if (PKG_CONFIG_LIBLZMA_VERSION)
             set(LIBLZMA_VERSION ${PKG_CONFIG_LIBLZMA_VERSION})
         endif()
@@ -43,7 +70,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-    LibLZMA
+    LIBLZMA
     FOUND_VAR LIBLZMA_FOUND
     REQUIRED_VARS LIBLZMA_LIBRARY LIBLZMA_INCLUDE_DIR
     VERSION_VAR LIBLZMA_VERSION

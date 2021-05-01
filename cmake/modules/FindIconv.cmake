@@ -1,9 +1,9 @@
-# try to find iconv.h API, once done this will define 
+# try to find iconv.h and libiconv, once done following variables will be defined
 #
-# ICONV_FOUND       - system has Iconv 
-# ICONV_INCLUDE_DIR - the Iconv include directory 
-# ICONV_LIBRARY     - the filepath of Iconv library
-# ICONV_VERSION     - the version  of Iconv library
+# ICONV_FOUND       - system has libiconv
+# ICONV_VERSION     - the version of libiconv
+# ICONV_INCLUDE_DIR - the libiconv include directory
+# ICONV_LIBRARY     - the filepath of libiconv.a|so|dylib
 
 
 if (ICONV_INCLUDE_DIR AND ICONV_LIBRARY)
@@ -63,7 +63,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-    Iconv
+    ICONV
     FOUND_VAR ICONV_FOUND
     REQUIRED_VARS ICONV_LIBRARY ICONV_INCLUDE_DIR ICONV_IS_OK
     VERSION_VAR ICONV_VERSION

@@ -1,9 +1,9 @@
-# try to find pthread API, once done this will define 
+# try to find pthread, once done following variables will be defined
 #
-# PTHREAD_FOUND       - system has pthread 
-# PTHREAD_INCLUDE_DIR - the pthread include directory 
-# PTHREAD_LIBRARY     - the filepath of pthread library
-# PTHREAD_VERSION     - the version  of pthread library
+# PTHREAD_FOUND       - system has pthread
+# PTHREAD_VERSION     - the version of pthread
+# PTHREAD_INCLUDE_DIR - the pthread include directory
+# PTHREAD_LIBRARY     - the filepath of libpthread.a|so|dylib
 
 
 if (PTHREAD_INCLUDE_DIR AND PTHREAD_LIBRARY)
@@ -41,7 +41,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-    Pthread
+    PTHREAD
     FOUND_VAR PTHREAD_FOUND
     REQUIRED_VARS PTHREAD_LIBRARY PTHREAD_INCLUDE_DIR
     VERSION_VAR PTHREAD_VERSION

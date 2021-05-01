@@ -1,9 +1,9 @@
-# try to find seccomp.h API, once done this will define
+# try to find seccomp.h and libseccomp, once done following variables will be defined
 #
 # LIBSECCOMP_FOUND       - system has libseccomp
+# LIBSECCOMP_VERSION     - the version of libseccomp
 # LIBSECCOMP_INCLUDE_DIR - the libseccomp include directory
-# LIBSECCOMP_LIBRARY     - the filepath of libseccomp library
-# LIBSECCOMP_VERSION     - the version  of libseccomp library
+# LIBSECCOMP_LIBRARY     - the filepath of libseccomp.a|so|dylib
 
 
 if (LIBSECCOMP_INCLUDE_DIR AND LIBSECCOMP_LIBRARY)
@@ -53,6 +53,6 @@ else()
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibSeccomp REQUIRED_VARS LIBSECCOMP_LIBRARY LIBSECCOMP_INCLUDE_DIR VERSION_VAR LIBSECCOMP_VERSION)
+find_package_handle_standard_args(LIBSECCOMP REQUIRED_VARS LIBSECCOMP_LIBRARY LIBSECCOMP_INCLUDE_DIR VERSION_VAR LIBSECCOMP_VERSION)
 
 mark_as_advanced(LIBSECCOMP_INCLUDE_DIR LIBSECCOMP_LIBRARY)

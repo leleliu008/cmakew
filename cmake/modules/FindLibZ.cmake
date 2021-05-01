@@ -1,9 +1,9 @@
-# try to find libz API, once done this will define 
+# try to find libz, once done following variables will be defined
 #
-# LIBZ_FOUND       - system has libz 
-# LIBZ_INCLUDE_DIR - the libz include directory 
-# LIBZ_LIBRARY     - the filepath of libz library
-# LIBZ_VERSION     - the version  of libz library
+# LIBZ_FOUND       - system has libz
+# LIBZ_VERSION     - the version of libz
+# LIBZ_INCLUDE_DIR - the libz include directory
+# LIBZ_LIBRARY     - the filepath of libz.a|so|dylib
 
 
 if (LIBZ_INCLUDE_DIR AND LIBZ_LIBRARY)
@@ -41,7 +41,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-    LibZ
+    LIBZ
     FOUND_VAR LIBZ_FOUND
     REQUIRED_VARS LIBZ_LIBRARY LIBZ_INCLUDE_DIR
     VERSION_VAR LIBZ_VERSION

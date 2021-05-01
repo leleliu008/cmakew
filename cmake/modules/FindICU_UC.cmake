@@ -1,9 +1,9 @@
-# try to find icuuc API, once done this will define 
+# try to find libicuuc, once done following variables will be defined
 #
-# ICU_UC_FOUND       - system has icuuc 
-# ICU_UC_INCLUDE_DIR - the icuuc include directory 
-# ICU_UC_LIBRARY     - the filepath of icuuc library
-# ICU_UC_VERSION     - the version  of icuuc library
+# ICU_UC_FOUND       - system has libicuuc
+# ICU_UC_VERSION     - the version of libicuuc
+# ICU_UC_INCLUDE_DIR - the libicuuc include directory
+# ICU_UC_LIBRARY     - the filepath of libicuuc.a|so|dylib
 
 
 if (ICU_UC_INCLUDE_DIR AND ICU_UC_LIBRARY)

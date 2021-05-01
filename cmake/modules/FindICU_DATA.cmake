@@ -1,9 +1,9 @@
-# try to find icudata API, once done this will define 
+# try to find libicudata, once done following variables will be defined
 #
-# ICU_DATA_FOUND       - system has icudata 
-# ICU_DATA_INCLUDE_DIR - the icudata include directory 
-# ICU_DATA_LIBRARY     - the filepath of icudata library
-# ICU_DATA_VERSION     - the version  of icudata library
+# ICU_DATA_FOUND       - system has icudata
+# ICU_DATA_VERSION     - the version  of libicudata
+# ICU_DATA_INCLUDE_DIR - the libicudata include directory
+# ICU_DATA_LIBRARY     - the filepath of libicudata.a|so|dylib
 
 
 if (ICU_DATA_INCLUDE_DIR AND ICU_DATA_LIBRARY)

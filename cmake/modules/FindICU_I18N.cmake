@@ -1,9 +1,9 @@
-# try to find icui18n API, once done this will define 
+# try to find libicui18n, once done following variables will be defined
 #
-# ICU_I18N_FOUND       - system has icui18n 
-# ICU_I18N_INCLUDE_DIR - the icui18n include directory 
-# ICU_I18N_LIBRARY     - the filepath of icui18n library
-# ICU_I18N_VERSION     - the version  of icui18n library
+# ICU_I18N_FOUND       - system has libicui18n
+# ICU_I18N_VERSION     - the version of libicui18n
+# ICU_I18N_INCLUDE_DIR - the libicui18n include directory
+# ICU_I18N_LIBRARY     - the filepath of libicui18n.a|so|dylib
 
 
 if (ICU_I18N_INCLUDE_DIR AND ICU_I18N_LIBRARY)

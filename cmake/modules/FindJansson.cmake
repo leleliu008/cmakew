@@ -1,9 +1,9 @@
-# try to find jansson.h API, once done this will define
+# try to find libjansson, once done following variables will be defined
 #
-# JANSSON_FOUND       - system has Jansson
-# JANSSON_INCLUDE_DIR - the Jansson include directory
-# JANSSON_LIBRARY     - the filepath of Jansson library
-# JANSSON_VERSION     - the version  of Jansson library
+# JANSSON_FOUND       - system has libjansson
+# JANSSON_VERSION     - the version of libansson
+# JANSSON_INCLUDE_DIR - the libjansson include directory
+# JANSSON_LIBRARY     - the filepath of libjansson.a|so|dylib
 
 
 if (JANSSON_INCLUDE_DIR AND JANSSON_LIBRARY)
@@ -43,6 +43,6 @@ else()
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Jansson REQUIRED_VARS JANSSON_LIBRARY JANSSON_INCLUDE_DIR VERSION_VAR JANSSON_VERSION)
+find_package_handle_standard_args(JANSSON REQUIRED_VARS JANSSON_LIBRARY JANSSON_INCLUDE_DIR VERSION_VAR JANSSON_VERSION)
 
 mark_as_advanced(JANSSON_INCLUDE_DIR JANSSON_LIBRARY)
