@@ -15,11 +15,12 @@ jobs:
         shell: C:\tools\cygwin\bin\bash.exe -l -i {0}
 
     steps:
+    - run: choco uninstall -y cygwin
+    - run: choco   install -y cygwin
     - run: choco install -y --source cygwin git patch file
       shell: pwsh
     
     - run: git config --global core.autocrlf input
-      shell: bash
 
     - uses: actions/checkout@v2
     
