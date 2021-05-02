@@ -26,8 +26,11 @@ jobs:
         update: true
         install: git patch libiconv-devel
 
+    - run: echo "$PATH"
+
     - run: git config --global core.autocrlf input
       shell: bash
+
     - uses: actions/checkout@v2
 
     - run: git clone https://github.com/universal-ctags/ctags
@@ -40,7 +43,7 @@ jobs:
             patch -p1 < "$item" || return 1
           done
 
-    - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release
+    - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release || (cat build.d/CMakeFiles/CMakeError.log; return 1)
     - run: cd ctags && ./cmakew install
     - run: file /usr/local/bin/ctags
     - run: /usr/local/bin/ctags --version
