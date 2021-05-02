@@ -12,12 +12,13 @@ jobs:
 
     defaults:
       run:
-        shell: C:\tools\cygwin\bin\bash.exe -l -i {0}
+        shell: cygwin {0}
 
     steps:
-    - run: choco install -y cygwin
-    - run: choco install -y --source cygwin git patch file
+    - run: C:\tools\cygwin\bin\bash.exe -c "sed -i 's/--login -i/--login -i %1/' /cygdrive/c/tools/cygwin/Cygwin.bat"
       shell: pwsh
+   
+    - run: choco install -y --source cygwin git patch file
     
     - run: git config --global core.autocrlf input
 
