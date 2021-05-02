@@ -19,7 +19,7 @@ else()
     #message("PKG_CONFIG_LIBDL_VERSION=${PKG_CONFIG_LIBDL_VERSION}")
      
     if (ENABLE_STATIC)
-        set(LIBDL_LIBRARY_NAMES libdl.a dl)
+        set(LIBDL_LIBRARY_NAMES dl)
     else()
         set(LIBDL_LIBRARY_NAMES dl)
     endif()
