@@ -43,6 +43,8 @@ jobs:
             patch -p1 < "$item" || return 1
           done
 
+    - run: cd ctags && ./misc/optlib2c optlib/RSpec.ctags > optlib/RSpec.c
+
     - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release || (cat build.d/CMakeFiles/CMakeError.log; return 1)
     - run: cd ctags && ./cmakew install
     - run: file /usr/local/bin/ctags
