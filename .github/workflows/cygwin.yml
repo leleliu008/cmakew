@@ -35,7 +35,7 @@ jobs:
 
     - run: cd ctags; for item in patch/*.patch; do patch -p1 < "$item" || return 1; done
 
-    - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release
+    - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/usr/bin/make
     - run: cd ctags && cat build.d/CMakeFiles/CMakeOutput.log
     - run: cd ctags && cat build.d/CMakeFiles/CMakeError.log
     - run: cd ctags && ./cmakew install
