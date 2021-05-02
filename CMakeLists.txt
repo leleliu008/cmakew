@@ -10,20 +10,19 @@ set(PACKAGE_BUGREPORT_URL "https://github.com/universal-ctags/ctags/issues")
 ##########################################################################################
 
 # {{{  define custom options
-option(ENABLE_STATIC  "if link static libraries."  ON)
+option(ENABLE_STATIC  "if static library preferred."  ON)
 
-option(ENABLE_XML     "if support XML feature."  ON)
+option(ENABLE_XML     "if support XML  feature." ON)
 option(ENABLE_YAML    "if support YAML feature." ON)
 option(ENABLE_JSON    "if support JSON feature." ON)
 
-option(ENABLE_ICONV   "if use iconv.h API." ON)
-option(ENABLE_SECCOMP "if use libseccomp."  ON)
-option(ENABLE_GCOV    "if use gcov."        ON)
-
+option(USE_ICONV      "if use iconv.h API." ON)
+option(USE_LIBSECCOMP "if use libseccomp."  ON)
+option(USE_GCOV       "if use gcov."        ON)
 option(USE_INTERNAL_SORT "if use internal sort, otherwise use external sort." ON)
 
-option(BUILD_TESTING    "if build and run tests."    ON)
-option(BUILD_MANPAGES   "if build and install docs." ON)
+option(BUILD_TESTING    "if config for ctest."           ON)
+option(BUILD_MANPAGES   "if build and install manpages." ON)
 
 option(INSTALL_READTAGS "if build and install readtags binary." ON)
 option(INSTALL_ETAGS    "if build and install etags binary."    ON)
@@ -42,10 +41,10 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 if ((CMAKE_BUILD_TYPE STREQUAL Release) OR (CMAKE_BUILD_TYPE STREQUAL MinSizeRel))
-    set(ENABLE_GCOV OFF)
+    set(USE_GCOV OFF)
 endif()
 
-if (ENABLE_GCOV)
+if (USE_GCOV)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
 endif()
 
@@ -162,14 +161,14 @@ if (ENABLE_JSON)
     endif()
 endif()
 
-if (ENABLE_ICONV)
+if (USE_ICONV)
     find_package(ICONV)
     if (ICONV_FOUND)
         set(HAVE_ICONV 1)
     endif()
 endif()
 
-if (ENABLE_SECCOMP)
+if (USE_LIBSECCOMP)
     find_package(LIBSECCOMP)
     if (LIBSECCOMP_FOUND)
         set(HAVE_SECCOMP 1)
