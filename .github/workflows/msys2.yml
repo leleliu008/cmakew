@@ -26,8 +26,6 @@ jobs:
         update: true
         install: git patch libiconv-devel
 
-    - run: echo "$PATH"
-
     - run: git config --global core.autocrlf input
       shell: bash
 
@@ -43,9 +41,7 @@ jobs:
             patch -p1 < "$item" || return 1
           done
 
-    - run: cd ctags && ./misc/optlib2c optlib/RSpec.ctags > optlib/RSpec.c
-
-    - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release || (cat build.d/CMakeFiles/CMakeError.log; return 1)
+    - run: cd ctags && ./cmakew config -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
     - run: cd ctags && ./cmakew install
-    - run: file /usr/local/bin/ctags
-    - run: /usr/local/bin/ctags --version
+    - run: file /usr/bin/ctags
+    - run: /usr/bin/ctags --version
