@@ -15,7 +15,7 @@ jobs:
         shell: cygwin {0}
 
     steps:
-    - run: C:\tools\cygwin\bin\bash.exe -c "sed -i 's/--login -i/--login -i %1/' /cygdrive/c/tools/cygwin/Cygwin.bat"
+    - run: C:\tools\cygwin\bin\bash.exe --login -i -c "sed -i 's/--login -i/--login -i %1/' /cygdrive/c/tools/cygwin/Cygwin.bat"
       shell: pwsh
    
     - run: choco install -y --source cygwin git patch file
