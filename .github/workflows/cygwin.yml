@@ -24,6 +24,7 @@ jobs:
     - run: choco install -y --source cygwin git patch file
     
     - run: git config --global core.autocrlf input
+      shell: bash
 
     - uses: actions/checkout@v2
     
