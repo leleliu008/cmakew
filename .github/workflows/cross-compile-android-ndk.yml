@@ -1,0 +1,52 @@
+name: cross compile with android-ndk
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  cross-compile:
+    strategy:
+      fail-fast: false
+      matrix:
+        build-machine-os: [ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, macos-10.15]
+        android-abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
+
+    runs-on: ${{ matrix.build-machine-os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - run: command -v git   > /dev/null || brew install git
+      - run: command -v file  > /dev/null || brew install file
+      - run: command -v patch > /dev/null || brew install patch
+
+      - run: git clone https://github.com/universal-ctags/ctags
+      - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
+
+      - run: |
+            cd ctags
+            for item in patch/*.patch
+            do
+              patch -p1 < "$item" || return 1
+            done
+
+      - run: |
+            cd ctags
+            ./cmakew config \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=./output/android \
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+                -DCMAKE_VERBOSE_MAKEFILE=ON \
+                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+                -DANDROID_TOOLCHAIN=clang \
+                -DANDROID_ABI=${{ matrix.android-abi }} \
+                -DANDROID_ARM_NEON=TRUE \
+                -DANDROID_PLATFORM=21 \
+                -Wno-dev
+
+      - run: cd ctags && ./cmakew install
+      - run: cd ctags &&      ./output/android/bin/ctags --version
+      - run: cd ctags && file ./output/android/bin/ctags | grep ELF

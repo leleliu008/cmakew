@@ -1,0 +1,49 @@
+name: cross compile with mingw-w64
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  cross-compile:
+    strategy:
+      fail-fast: false
+      matrix:
+        build-machine-os: [ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, macos-10.15]
+        target: [i686-w64-mingw32, x86_64-w64-mingw32]
+
+    runs-on: ${{ matrix.build-machine-os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - run: brew install mingw-w64
+      - run: command -v git   > /dev/null || brew install git
+      - run: command -v file  > /dev/null || brew install file
+      - run: command -v patch > /dev/null || brew install patch
+
+      - run: git clone https://github.com/universal-ctags/ctags
+      - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
+
+      - run: |
+            cd ctags
+            for item in patch/*.patch
+            do
+              patch -p1 < "$item" || return 1
+            done
+
+      - run: |
+            cd ctags
+            ./cmakew config \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=./output/mingw \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=ON \
+            -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchain/${{ matrix.target }}.cmake
+            -Wno-dev
+
+      - run: cd ctags && ./cmakew install
+      - run: cd ctags &&      ./output/mingw/bin/ctags.exe --version
+      - run: cd ctags && file ./output/mingw/bin/ctags.exe | grep PE32

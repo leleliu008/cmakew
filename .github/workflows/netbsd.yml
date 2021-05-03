@@ -23,6 +23,8 @@ jobs:
         mem: 2048
         box: generic/netbsd${{ matrix.version }}
         run: |
+          export LD_LIBRARY_PATH=/usr/pkg/lib
+
           run sudo pkgin -y install git patch file mozilla-rootcerts
 
           run sudo mozilla-rootcerts install
