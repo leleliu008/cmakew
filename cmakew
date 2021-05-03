@@ -1397,6 +1397,53 @@ optional() {
     fi
 }
 
+__handle_required_list() { 
+    step "handle required"
+
+    if [ "$DEBUG" = 'true' ] ; then
+        echo "REQUIRED=$REQUIRED"
+        echo "OPTIONAL=$OPTIONAL"
+        echo
+    fi
+
+    for item in $REQUIRED
+    do
+        REQUIRED_ITEM_INDEX=$(expr ${REQUIRED_ITEM_INDEX-0} + 1)
+        __handle_required_item $(__decode "$item") || return 1
+    done
+    unset REQUIRED_ITEM_INDEX
+}
+
+__print_required_list() {
+    step "list required"
+    if [ -z "$REQUIRED" ] ; then
+        warn "no required."
+    else
+        printf "%-7s %-11s %-10s %-10s %s\n" TYPE NAME EXPECTED ACTUAL LOCATION
+        for item in $REQUIRED
+        do
+            REQUIRED_ITEM_INDEX=$(expr ${REQUIRED_ITEM_INDEX-0} + 1)
+            __print_required_or_optional_item $(__decode "$item")
+        done
+        unset REQUIRED_ITEM_INDEX
+    fi
+}
+
+__print_optional_list() {
+    step "list optional"
+    if [ -z "$OPTIONAL" ] ; then
+        warn "no optional."
+    else
+        printf "%-7s %-11s %-10s %-10s %s\n" TYPE NAME EXPECTED ACTUAL LOCATION
+        for item in $OPTIONAL
+        do
+            OPTIONAL_ITEM_INDEX=$(expr ${OPTIONAL_ITEM_INDEX-0} + 1)
+            __print_required_or_optional_item $(__decode "$item")
+        done
+        unset OPTIONAL_ITEM_INDEX
+    fi
+}
+
 ##################################################################
 
 perform_config() {
@@ -1457,6 +1504,8 @@ perform_config() {
     fi
 }
 
+##################################################################
+
 perform_build() {
     step 'perform cmakew build'
     if [ -f .cmakew ] ; then
@@ -1467,6 +1516,8 @@ perform_build() {
     fi
 }
 
+##################################################################
+
 perform_install() {
     step 'perform cmakew install'
     if [ -f .cmakew ] ; then
@@ -1476,6 +1527,8 @@ perform_install() {
         die "please run ./cmakew config before ./cmakew install"
     fi
 }
+
+##################################################################
 
 perform_pack() {
     step 'perform cmakew pack'
@@ -1492,6 +1545,8 @@ perform_pack() {
     fi
 }
 
+##################################################################
+
 perform_test() {
     step 'perform cmakew test'
     if [ -f .cmakew ] ; then
@@ -1503,6 +1558,8 @@ perform_test() {
     fi
 }
 
+##################################################################
+
 perform_clean() {
     step 'perform cmakew clean'
     if [ -f .cmakew ] ; then
@@ -1511,6 +1568,8 @@ perform_clean() {
         run rm -rf .cmakew
     fi
 }
+
+##################################################################
 
 main() {
     echo "${COLOR_GREEN}cmake wrapper is desinged to help you using cmake easily.${COLOR_OFF}"
@@ -1585,7 +1644,7 @@ EOF
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
-    step "load cmakew.rc"
+    step "load $RC_FILE"
     if exists file "$RC_FILE" ; then
         if . "$RC_FILE" ; then
             success "$RC_FILE loaded successfully."
@@ -1596,46 +1655,29 @@ EOF
         warn "$RC_FILE not exist. skipped."
     fi
 
-    step "show current machine os info"
     NATIVE_OS_KIND=$(os kind)
     NATIVE_OS_TYPE=$(os type)
     NATIVE_OS_NAME=$(os name)
     NATIVE_OS_VERS=$(os version)
     NATIVE_OS_ARCH=$(os arch)
     NATIVE_OS_LIBC=$(os libc)
-    echo "NATIVE_OS_KIND  = $NATIVE_OS_KIND"
-    echo "NATIVE_OS_TYPE  = $NATIVE_OS_TYPE"
-    echo "NATIVE_OS_NAME  = $NATIVE_OS_NAME"
-    echo "NATIVE_OS_VERS  = $NATIVE_OS_VERS"
-    echo "NATIVE_OS_ARCH  = $NATIVE_OS_ARCH"
-    echo "NATIVE_OS_LIBC  = $NATIVE_OS_LIBC"
 
     if [ "$NATIVE_OS_KIND" != 'windows' ] ; then
         [ "$(whoami)" = root ] || sudo=sudo
     fi
     
-    step "show current machine os effective user info"
-    id | tr ' ' '\n' | head -n 2
-
-    step "show current project info"
-
     die_if_file_is_not_exist CMakeLists.txt
     
     PROJECT_DIR="$PWD"
 
     # https://cmake.org/cmake/help/latest/command/project.html
     PROJECT_NAME=$(grep 'project(.*).*' CMakeLists.txt | sed 's/project(\(.*\)).*/\1/'| cut -d' ' -f1)
-    PROJECT_VERSION=$(grep 'project(.*).*' CMakeLists.txt | sed 's/project(\(.*\)).*/\1/'| cut -d' ' -f2)
+    PROJECT_VERSION=$(grep 'set(PACKAGE_VERSION .*).*' CMakeLists.txt | sed 's/set(PACKAGE_VERSION \(.*\)).*/\1/')
     
-    echo "PROJECT_DIR     = $PROJECT_DIR"
-    echo "PROJECT_NAME    = $PROJECT_NAME"
-    echo "PROJECT_VERSION = $PROJECT_VERSION"
-
     CMAKE_VERSION_MREQUIRED=$(grep 'cmake_minimum_required(VERSION\s*\[.*\])\s*$' CMakeLists.txt | sed 's/cmake_minimum_required(VERSION\s*\(.*\))/\1/')
     if [ -z "$CMAKE_VERSION_MREQUIRED" ] ; then
         CMAKE_VERSION_MREQUIRED=$(grep 'CMAKE_MINIMUM_REQUIRED(VERSION\s*\[.*\])\s*$' CMakeLists.txt | sed 's/CMAKE_MINIMUM_REQUIRED(VERSION\s*\(.*\))/\1/')
     fi
-
     if [ -z "$CMAKE_VERSION_MREQUIRED" ] ; then
         required command cmake
     else
@@ -1658,57 +1700,47 @@ EOF
             done
         fi
     fi
+    
+    if exists command "perform_${ACTION}_pre" ; then
+        eval "perform_${ACTION}_pre $@" || return 1
+    fi
 
     if [ "$DEBUG" = 'true' ] ; then
-        echo "\nPATH:"
+        step "show current machine os info"
+        echo "NATIVE_OS_KIND  = $NATIVE_OS_KIND"
+        echo "NATIVE_OS_TYPE  = $NATIVE_OS_TYPE"
+        echo "NATIVE_OS_NAME  = $NATIVE_OS_NAME"
+        echo "NATIVE_OS_VERS  = $NATIVE_OS_VERS"
+        echo "NATIVE_OS_ARCH  = $NATIVE_OS_ARCH"
+        echo "NATIVE_OS_LIBC  = $NATIVE_OS_LIBC"
+
+        step "show current machine os effective user info"
+        id | tr ' ' '\n' | head -n 2
+
+        step "show current project info"
+        echo "PROJECT_DIR     = $PROJECT_DIR"
+        echo "PROJECT_NAME    = $PROJECT_NAME"
+        echo "PROJECT_VERSION = $PROJECT_VERSION"
+
+        step "show PATH"
         for item in $(echo "$PATH" | tr ' ' '|' | tr ':' ' ')
         do
-            echo "    $item" | tr '|' ' '
+            echo "$item" | tr '|' ' '
         done
     fi
 
-    step "handle required"
+    __handle_required_list || return 1
+    
     if [ "$DEBUG" = 'true' ] ; then
-        echo
-        echo "REQUIRED=$REQUIRED"
-        echo "OPTIONAL=$OPTIONAL"
-    fi
-    for item in $REQUIRED
-    do
-        REQUIRED_ITEM_INDEX=$(expr ${REQUIRED_ITEM_INDEX-0} + 1)
-        __handle_required_item $(__decode "$item") || return 1
-    done
-    unset REQUIRED_ITEM_INDEX
-
-
-    step "list required"
-    if [ -z "$REQUIRED" ] ; then
-        warn "no required."
-    else
-        printf "%-7s %-11s %-10s %-10s %s\n" TYPE NAME EXPECTED ACTUAL LOCATION
-        for item in $REQUIRED
-        do
-            REQUIRED_ITEM_INDEX=$(expr ${REQUIRED_ITEM_INDEX-0} + 1)
-            __print_required_or_optional_item $(__decode "$item")
-        done
-        unset REQUIRED_ITEM_INDEX
+        __print_required_list
+        __print_optional_list
     fi
 
-
-    step "list optional"
-    if [ -z "$OPTIONAL" ] ; then
-        warn "no optional."
-    else
-        printf "%-7s %-11s %-10s %-10s %s\n" TYPE NAME EXPECTED ACTUAL LOCATION
-        for item in $OPTIONAL
-        do
-            OPTIONAL_ITEM_INDEX=$(expr ${OPTIONAL_ITEM_INDEX-0} + 1)
-            __print_required_or_optional_item $(__decode "$item")
-        done
-        unset OPTIONAL_ITEM_INDEX
+    eval "perform_$ACTION $@" || return 1
+    
+    if exists command "perform_${ACTION}_post" ; then
+        eval "perform_${ACTION}_post $@" || return 1
     fi
-
-    eval "perform_$ACTION $@"
 }
 
 main $@

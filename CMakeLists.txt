@@ -128,7 +128,7 @@ use_packcc_to_convert_peg_files_to_c_files()
 if (WIN32)
     add_definitions(-DWIN32)
     include_directories(${PROJECT_SOURCE_DIR}/src)
-    set(WIN32_SRCS win32/mkstemp/mkstemp.c win32/ctags.rc)
+    set(SRCS_WIN32 win32/mkstemp/mkstemp.c win32/ctags.rc)
 endif()
 # }}}
 
@@ -204,10 +204,13 @@ endif()
 
 # {{{ build readtags if want
 if (INSTALL_READTAGS)
-    aux_source_directory(dsl DSL_SRCS)
-    aux_source_directory(extra-cmds EXTRA_SRCS)
+    aux_source_directory(dsl        SRCS_DSL)
+    aux_source_directory(extra-cmds SRCS_EXTRA)
 
-    add_executable(readtags libreadtags/readtags.c main/mio.c ${DSL_SRCS} ${EXTRA_SRCS})
+    list(REMOVE_ITEM SRCS_DSL   "dsl/optscript.c")
+    list(REMOVE_ITEM SRCS_EXTRA "extra-cmds/optscript-repl.c")
+
+    add_executable(readtags libreadtags/readtags.c main/mio.c ${SRCS_DSL} ${SRCS_EXTRA})
     
     if (NOT HAVE_REGCOMP)
         target_link_libraries(readtags gnu_regex)
@@ -222,29 +225,29 @@ endif()
 
 # {{{ prepare source files
 if (NOT HAVE_FNMATCH)
-    include_directories(fnmatch)
-    aux_source_directory(fnmatch FNMATCH_SRCS)
+    include_directories (fnmatch)
+    aux_source_directory(fnmatch SRCS_FNMATCH)
 endif()
 
-aux_source_directory(peg PEG_SRCS)
-aux_source_directory(main CTAGS_SRCS)
-aux_source_directory(optlib OPTLIB_SRCS)
-aux_source_directory(parsers PARSERS_SRCS)
-aux_source_directory(parsers/cxx PARSER_CXX_SRCS)
+aux_source_directory(peg         SRCS_PEG)
+aux_source_directory(main        SRCS_CTAGS)
+aux_source_directory(optlib      SRCS_OPTLIB)
+aux_source_directory(parsers     SRCS_PARSERS)
+aux_source_directory(parsers/cxx SRCS_PARSER_CXX)
 
 foreach(item cmd.c mini-geany.c)
-    list(REMOVE_ITEM CTAGS_SRCS "main/${item}")
+    list(REMOVE_ITEM SRCS_CTAGS "main/${item}")
 endforeach()
 
 if (NOT HAVE_LIBXML)
     foreach(item maven2.c dbusintrospect.c glade.c svg.c plist.c relaxng.c xml.c xslt.c)
-        list(REMOVE_ITEM PARSERS_SRCS "parsers/${item}")
+        list(REMOVE_ITEM SRCS_PARSERS "parsers/${item}")
     endforeach()
 endif()
 
 if (NOT HAVE_LIBYAML)
     foreach(item yaml.c ansibleplaybook.c)
-        list(REMOVE_ITEM PARSERS_SRCS "parsers/${item}")
+        list(REMOVE_ITEM SRCS_PARSERS "parsers/${item}")
     endforeach()
 endif()
 
@@ -254,10 +257,11 @@ include_directories(main)
 ##########################################################################################
 
 # {{{ build libctags ctags
-add_library(libctags STATIC src/datetime/datetime.c ${CTAGS_SRCS} ${WIN32_SRCS} ${FNMATCH_SRCS} ${OPTLIB_SRCS} ${PARSERS_SRCS} ${PARSER_CXX_SRCS} ${PEG_SRCS})
+add_library(libctags STATIC src/datetime/datetime.c dsl/optscript.c dsl/es.c ${SRCS_CTAGS} ${SRCS_WIN32} ${SRCS_FNMATCH} ${SRCS_OPTLIB} ${SRCS_PARSERS} ${SRCS_PARSER_CXX} ${SRCS_PEG})
 
 target_include_directories(libctags PRIVATE src)
 target_include_directories(libctags PRIVATE peg)
+target_include_directories(libctags PRIVATE dsl)
 target_compile_definitions(libctags PRIVATE -DHAVE_PACKCC)
 
 if (NOT HAVE_REGCOMP)
@@ -295,6 +299,11 @@ target_link_libraries(ctags libctags)
 
 add_executable(mini-geany main/mini-geany.c)
 target_link_libraries(mini-geany libctags)
+target_include_directories(mini-geany PRIVATE dsl)
+
+add_executable(optscript extra-cmds/optscript-repl.c)
+target_link_libraries(optscript libctags)
+target_include_directories(optscript PRIVATE dsl)
 # }}}
 
 ##########################################################################################
@@ -302,7 +311,8 @@ target_link_libraries(mini-geany libctags)
 # {{{ installation
 include(GNUInstallDirs)
 
-install(TARGETS ctags RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS ctags     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS optscript RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if (INSTALL_ETAGS)
     install_link(ctags etags)
