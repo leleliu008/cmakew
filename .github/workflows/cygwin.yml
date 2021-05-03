@@ -38,6 +38,6 @@ jobs:
     - run: cd ctags && ./cmakew -d config -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/usr/bin/make
     - run: cd ctags && cat build.d/CMakeFiles/CMakeOutput.log
     - run: cd ctags && cat build.d/CMakeFiles/CMakeError.log
-    - run: cd ctags && ./cmakew install
+    - run: cd ctags && ./cmakew -d install
     - run: file /usr/local/bin/ctags
     - run: /usr/local/bin/ctags --version

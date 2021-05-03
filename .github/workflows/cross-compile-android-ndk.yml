@@ -47,6 +47,5 @@ jobs:
                 -DANDROID_PLATFORM=21 \
                 -Wno-dev
 
-      - run: cd ctags && ./cmakew install
-      - run: cd ctags &&      ./output/android/bin/ctags --version
+      - run: cd ctags && ./cmakew -d install
       - run: cd ctags && file ./output/android/bin/ctags | grep ELF

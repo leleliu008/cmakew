@@ -44,6 +44,5 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchain/${{ matrix.target }}.cmake
             -Wno-dev
 
-      - run: cd ctags && ./cmakew install
-      - run: cd ctags &&      ./output/mingw/bin/ctags.exe --version
+      - run: cd ctags && ./cmakew -d install
       - run: cd ctags && file ./output/mingw/bin/ctags.exe | grep PE32
