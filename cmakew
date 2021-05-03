@@ -1512,7 +1512,7 @@ perform_build() {
         . ./.cmakew || return 1
         run cmake --build "$BUILD_DIR" || return 1
     else
-        die "please run ./cmakew config before ./cmakew build"
+        die "haven't configed. please run ./cmakew config first."
     fi
 }
 
@@ -1522,9 +1522,9 @@ perform_install() {
     step 'perform cmakew install'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
-        run cmake --build "$BUILD_DIR" --target install || return 1
+        run cmake --install "$BUILD_DIR" || return 1
     else
-        die "please run ./cmakew config before ./cmakew install"
+        die "haven't configed. please run ./cmakew config first."
     fi
 }
 
@@ -1541,7 +1541,7 @@ perform_pack() {
             fi
         done
     else
-        die "please run ./cmakew config before ./cmakew pack"
+        die "haven't configed. please run ./cmakew config first."
     fi
 }
 
@@ -1554,7 +1554,7 @@ perform_test() {
         cd "$BUILD_DIR" || return 1
         run ctest -V || return 1
     else
-        die "please run ./cmakew config before ./cmakew test"
+        die "haven't configed. please run ./cmakew config first."
     fi
 }
 

@@ -41,7 +41,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=./output/mingw \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DCMAKE_VERBOSE_MAKEFILE=ON \
-            -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchain/${{ matrix.target }}.cmake
+            -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchain/${{ matrix.target }}.cmake \
             -Wno-dev
 
       - run: cd ctags && ./cmakew -d install
