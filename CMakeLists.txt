@@ -10,7 +10,7 @@ set(PACKAGE_BUGREPORT_URL "https://github.com/universal-ctags/ctags/issues")
 ##########################################################################################
 
 # {{{  define custom options
-option(ENABLE_STATIC  "if static library preferred."  ON)
+option(ENABLE_STATIC  "if static library preferred."  OFF)
 
 option(ENABLE_XML     "if support XML  feature." ON)
 option(ENABLE_YAML    "if support YAML feature." ON)
