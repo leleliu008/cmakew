@@ -1453,6 +1453,7 @@ perform_config() {
     unset BUILD_DIR_SET
 
     unset BUILD_DIR
+    unset BUILD_SYS
     unset GENERATOR
 
     unset CMAKE_FLAGS
@@ -1493,11 +1494,17 @@ perform_config() {
     fi
 
     if [ "$GENERATOR" = 'Unix Makefiles' ] ; then
+        BUILD_SYS=make
         __handle_required_item required command make
+    elif [ "$GENERATOR" = 'Ninja' ] ; then
+        BUILD_SYS=ninja
+        __handle_required_item required command ninja
     fi
 
     if run cmake $CMAKE_FLAGS ; then
-        printf "%s" "BUILD_DIR='$BUILD_DIR'" > "$PROJECT_DIR/.cmakew"
+        printf "%s\n" "BUILD_DIR='$BUILD_DIR'"  > "$PROJECT_DIR/.cmakew"
+        printf "%s\n" "BUILD_SYS='$BUILD_SYS'" >> "$PROJECT_DIR/.cmakew"
+        printf "%s\n" "BUILD_YES=0"            >> "$PROJECT_DIR/.cmakew"
     else
         rm -f "$PROJECT_DIR/.cmakew"
         return 1
@@ -1511,8 +1518,9 @@ perform_build() {
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         if run cmake --build "$BUILD_DIR" ; then
-            printf "%s\n" "BUILD_DIR='$BUILD_DIR'" > "$PROJECT_DIR/.cmakew"
-            printf "%s\n" "BUILD_DONE=true"       >> "$PROJECT_DIR/.cmakew"
+            printf "%s\n" "BUILD_DIR='$BUILD_DIR'"  > "$PROJECT_DIR/.cmakew"
+            printf "%s\n" "BUILD_SYS='$BUILD_SYS'" >> "$PROJECT_DIR/.cmakew"
+            printf "%s\n" "BUILD_YES=1"            >> "$PROJECT_DIR/.cmakew"
         else
             return 1
         fi
@@ -1526,11 +1534,16 @@ perform_build() {
 perform_install() {
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
-        if [ "$BUILD_DONE" != 'true' ] ; then
-            main build
+        if [ "$BUILD_YES" != 1 ] ; then
+            main build || return 1
         fi
         step 'perform cmakew install'
-        run cmake --install "$BUILD_DIR" || return 1
+        # https://stackoverflow.com/questions/34040522/is-there-a-cmake-install-switch/34040747
+        if command_version_match ge 3.15.0 ; then
+            run cmake --install "$BUILD_DIR"
+        else
+            run "$BUILD_SYS" -C "$BUILD_DIR" install
+        fi
     else
         step 'perform cmakew install'
         die "haven't configed. please run ./cmakew config first."
