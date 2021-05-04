@@ -1510,7 +1510,12 @@ perform_build() {
     step 'perform cmakew build'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
-        run cmake --build "$BUILD_DIR" || return 1
+        if run cmake --build "$BUILD_DIR" ; then
+            printf "%s\n" "BUILD_DIR='$BUILD_DIR'" > "$PROJECT_DIR/.cmakew"
+            printf "%s\n" "BUILD_DONE=true"       >> "$PROJECT_DIR/.cmakew"
+        else
+            return 1
+        fi
     else
         die "haven't configed. please run ./cmakew config first."
     fi
@@ -1519,11 +1524,15 @@ perform_build() {
 ##################################################################
 
 perform_install() {
-    step 'perform cmakew install'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
+        if [ "$BUILD_DONE" != 'true' ] ; then
+            main build
+        fi
+        step 'perform cmakew install'
         run cmake --install "$BUILD_DIR" || return 1
     else
+        step 'perform cmakew install'
         die "haven't configed. please run ./cmakew config first."
     fi
 }
