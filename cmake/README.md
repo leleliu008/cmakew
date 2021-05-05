@@ -17,7 +17,7 @@
 |[jansson](https://github.com/akheron/jansson)|recommended|JSON support||
 |[libseccomp](https://github.com/seccomp/libseccomp/)|recommended|sandbox support|available on GNU/Linux|
 
-## cmake options
+## custom cmake options
 |option|type|default|purpose|
 |-|-|-|-|
 |HOST_CC|STRING|cc|C Compiler to build `packcc`.|

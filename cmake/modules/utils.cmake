@@ -196,19 +196,28 @@ function(build_and_install_manpages)
     if (PYTHON3_EXECUTABLE)
         find_program(RST2MAN_EXECUTABLE NAMES rst2man rst2man.py rst2man-3 rst2man-3.6 rst2man-3.7 rst2man-3.8 rst2man-3.9)
         if (RST2MAN_EXECUTABLE)
+
             mkdir(${PROJECT_BINARY_DIR}/man)
-            file(GLOB RSTS RELATIVE ${PROJECT_SOURCE_DIR}/man "man/*.rst")
+
+            set(VERSION ${PROJECT_VERSION})
+            set(CTAGS_NAME_EXECUTABLE ctags)
+            set(ETAGS_NAME_EXECUTABLE etags)
+
+            file(GLOB RSTS RELATIVE ${PROJECT_SOURCE_DIR} "man/*.rst.in")
             foreach(item ${RSTS})
-                string(REPLACE ".rst" "" item2 ${item})
-                message(STATUS "run : ${RST2MAN_EXECUTABLE} ${PROJECT_SOURCE_DIR}/man/${item}")
+                string(REPLACE ".rst.in" "" item2 ${item})
+
+                configure_file(${item} ${PROJECT_BINARY_DIR}/${item2}.rst @ONLY)
+
+                message(STATUS "run : ${RST2MAN_EXECUTABLE} ${PROJECT_BINARY_DIR}/${item2}.rst")
                 execute_process(
-                    COMMAND ${RST2MAN_EXECUTABLE} ${PROJECT_SOURCE_DIR}/man/${item}
+                    COMMAND ${RST2MAN_EXECUTABLE} ${PROJECT_BINARY_DIR}/${item2}.rst
                     RESULT_VARIABLE ERROR
                     OUTPUT_STRIP_TRAILING_WHITESPACE
-                    OUTPUT_FILE ${PROJECT_BINARY_DIR}/man/${item2}
+                    OUTPUT_FILE ${PROJECT_BINARY_DIR}/${item2}
                 )
                 if (ERROR)
-                    message(FATAL_ERROR "${RST2MAN_EXECUTABLE} ${PROJECT_SOURCE_DIR}/man/${item} failed.")
+                    message(FATAL_ERROR "${RST2MAN_EXECUTABLE} ${PROJECT_BINARY_DIR}/${item2}.rst failed.")
                 endif()
                 unset(ERROR)
                 unset(item)

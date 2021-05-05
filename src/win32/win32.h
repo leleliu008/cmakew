@@ -9,10 +9,11 @@
 # ifndef WIN32_H
 # define WIN32_H
 
-# define CASE_INSENSITIVE_FILENAMES 1
-# define MANUAL_GLOBBING 1
-# define MSDOS_STYLE_PATH 1
+# define CASE_INSENSITIVE_FILENAMES
+# define MANUAL_GLOBBING
+# define MSDOS_STYLE_PATH
 
+// https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/findfirst-functions?view=msvc-160
 # define findfirst_t intptr_t
 
 # ifndef HAVE_MKSTEMP
@@ -22,10 +23,12 @@
 
 # define TMPDIR "\\"
 
+//https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=msvc-160
 # ifdef _MSC_VER
 
+    // https://stackoverflow.com/questions/119578/disabling-warnings-generated-via-crt-secure-no-deprecate/121573
     # ifndef _CRT_SECURE_NO_DEPRECATE
-    # define _CRT_SECURE_NO_DEPRECATE 1
+    # define _CRT_SECURE_NO_DEPRECATE
     # endif
 
     # pragma warning(disable : 4996)
