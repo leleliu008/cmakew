@@ -30,7 +30,7 @@ jobs:
     - run: cd ctags & patch -p1 -i patch/main-options.c.patch
     - run: cd ctags & patch -p1 -i patch/main-main.c.patch
 
-    - run: "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat" & cd ctags & cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./output
-    - run: "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat" & cd ctags & cmake --build --target install
+    - run: "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/Common7/Tools/VsDevCmd.bat" & cd ctags & cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./output
+    - run: "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/Common7/Tools/VsDevCmd.bat" & cd ctags & cmake --build --target install
     
     - run: cd ctags & output/bin/ctags --version
