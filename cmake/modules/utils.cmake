@@ -69,6 +69,19 @@ endfunction()
 
 ##########################################################################################
 
+# {{{ define function find_packages(...)
+function(find_packages)
+    foreach(item ${ARGV})
+        find_package(${item})
+        if (${item}_FOUND)
+            set(HAVE_${item} 1)
+        endif()
+    endforeach()
+endfunction()
+# }}}
+
+##########################################################################################
+
 # {{{ define macro git_commit_id(OUTPUT_VARIABLE)
 macro(git_commit_id)
     include(FindGit)

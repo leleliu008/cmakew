@@ -76,7 +76,7 @@ cmake --build build.d
 ```
 cmake --install build.d
 ```
-**Note:** step4 and step5 can merge to 1 step
+**Note:** step4 and step5 can merge in one step
 ```
 cmake --build build.d --target install
 ```
@@ -105,7 +105,7 @@ cmake --build build.d
 ```
 cmake --install build.d
 ```
-**Note:** step4 and step5 can merge to 1 step
+**Note:** step4 and step5 can merge in one step
 ```
 cmake --build build.d --target install
 ```
@@ -139,7 +139,7 @@ cmake --build build.d
 ```
 cmake --install build.d
 ```
-**Note:** step4 and step5 can merge to 1 step
+**Note:** step4 and step5 can merge in one step
 ```
 cmake --build build.d --target install
 ```
