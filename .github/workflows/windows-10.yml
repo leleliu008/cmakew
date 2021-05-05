@@ -1,0 +1,36 @@
+name: Windows-10
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: cmd /C {0}
+
+    steps:
+    - run: choco install -y visualstudio2019buildtools
+    - run: choco install -y visualstudio2019-workload-vctools 
+    - run: choco install -y pkgconfiglite
+    - run: choco install -y patch
+
+    - uses: actions/checkout@v2
+
+    - run: git clone https://github.com/universal-ctags/ctags
+    
+    - run: copy cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
+    
+    - run: cd ctags & patch -p1 -i patch/main-general.h.patch
+    - run: cd ctags & patch -p1 -i patch/main-options.c.patch
+    - run: cd ctags & patch -p1 -i patch/main-main.c.patch
+
+    - run: "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat" & cd ctags & cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./output
+    - run: "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat" & cd ctags & cmake --build --target install
+    
+    - run: cd ctags & output/bin/ctags --version
