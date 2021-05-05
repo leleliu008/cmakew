@@ -1,6 +1,6 @@
 if ""%1""=="""" (set VS_VERSION=2019) else (set VS_VERSION=%1)
 
-"C:\Program Files (x86)\Microsoft Visual Studio\%VS_VERSION%\BuildTools\Common7\Tools\VsDevCmd.bat"
+call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_VERSION%\BuildTools\Common7\Tools\VsDevCmd.bat"
 
 cmake ^
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ^
