@@ -189,6 +189,18 @@ cpack --config build.d/CPackConfig.cmake
 ```
 generated packages located in `pack` dir.
 
+## testing
+**run all tests**
+```
+ctest --test-dir build.d
+```
+
+**run tests matching regular expression**
+```
+ctest --test-dir build.d -R man
+ctest --test-dir build.d -R roundtrip
+```
+
 ## cmake versions
 |os-name|os-version|package-manager|cmake-version|works|
 |-|-|-|-|-|
