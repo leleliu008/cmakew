@@ -24,8 +24,8 @@ jobs:
 
     - run: git clone https://github.com/universal-ctags/ctags
     
-    - run: copy build.bat cmake CMakeLists.txt src patch misc ctags/
-    
+    - run: xcopy /s /y cmakew ctags
+
     - run: cd ctags & patch -p1 -i patch/main-general.h.patch
     - run: cd ctags & patch -p1 -i patch/main-options.c.patch
     - run: cd ctags & patch -p1 -i patch/main-main.c.patch
