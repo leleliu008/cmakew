@@ -24,7 +24,8 @@ jobs:
 
     - run: git clone https://github.com/universal-ctags/ctags
     
-    - run: xcopy /s /y cmakew ctags
+    - run: echo \ctags > excludes.txt
+    - run: xcopy /s /y /EXCLUDE:excludes.txt cmakew ctags
 
     - run: cd ctags & patch -p1 -i patch/main-general.h.patch
     - run: cd ctags & patch -p1 -i patch/main-options.c.patch
