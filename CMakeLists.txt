@@ -58,6 +58,10 @@ else()
     set(EXTERNAL_SORT 1)
 endif()
 
+if (MSVC)
+    set(BUILD_MANPAGES OFF)
+endif()
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 

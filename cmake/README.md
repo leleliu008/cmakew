@@ -23,26 +23,39 @@
 |HOST_CC|STRING|cc|C Compiler to build `packcc`.|
 |HOST_CFLAGS|STRING||`CFLAGS` for `HOST_CC`.|
 |||||
+|ENABLE_STATIC|BOOL|OFF|if static library preferred.|
+|||||
 |ENABLE_XML|BOOL|ON|if support `XML` feature.|
 |ENABLE_YAML|BOOL|ON|if support `YAML` feature.|
 |ENABLE_JSON|BOOL|ON|if support `JSON` feature.|
-|ENABLE_ICONV|BOOL|ON|if use [iconv.h](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/iconv.h.html) API.|
-|ENABLE_SECCOMP|BOOL|ON|if use `libseccomp`.|
-|ENABLE_GCOV|BOOL|ON|if use `gcov`.|
 |||||
-|BUILD_DOCS|BOOL|ON|if build and install manpages.|
-|BUILD_TESTS|BOOL|OFF|if build and run tests.|
+|USE_ICONV|BOOL|ON|if use [iconv.h](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/iconv.h.html) API.|
+|USE_LIBSECCOMP|BOOL|ON|if use `libseccomp`.|
+|USE_INTERNAL_SORT|BOOL|ON|if use internal `sort`, otherwise use external `sort`.|
+|USE_GCOV|BOOL|ON|if use `gcov`.|
+|||||
+|BUILD_MANPAGES|BOOL|ON|if build and install manpages.|
+|BUILD_TESTING|BOOL|OFF|if config for ctest.|
 |||||
 |INSTALL_READTAGS|BOOL|ON|if install `readtags` command.|
 |INSTALL_ETAGS|BOOL|ON|if install `etags` link.|
-|||||
-|USE_INTERNAL_SORT|BOOL|ON|if use internal `sort`, otherwise use external `sort`.|
 ||||||
 
 ## build for current machine (WINDOWS)
-**step1. install [Visual Studio](https://visualstudio.microsoft.com/downloads/) and other requirements**
 
-**step2. From the Start Menu "Visual Studio 2017" -> "x64 Native Tools Command Prompt"**
+**step1. install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/)**
+
+```
+choco install -y visualstudio2019buildtools
+choco install -y visualstudio2019-workload-vctools
+choco install -y pkgconfiglite
+```
+
+**step2. start "Visual Studio Developer Command Prompt"**
+
+```
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat"
+```
 
 **step3. config**
 ```
@@ -231,3 +244,5 @@ generated packages located in `pack` dir.
 |[Cygwin](https://www.cygwin.com/)||[Chocolatey](https://chocolatey.org/)|latest|✔︎|
 |[MSYS2](https://www.msys2.org/)||[pacman](https://www.msys2.org/docs/package-management/)|latest|✔︎|
 
+## cmakew
+some old version of system's package manager install very old version of cmake. I encourage user to use `cmakew` but using `cmake` directly.

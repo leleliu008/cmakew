@@ -1398,9 +1398,8 @@ optional() {
 }
 
 __handle_required_list() { 
-    step "handle required"
-
     if [ "$DEBUG" = 'true' ] ; then
+        step "handle required"
         echo "REQUIRED=$REQUIRED"
         echo "OPTIONAL=$OPTIONAL"
         echo
@@ -1447,7 +1446,7 @@ __print_optional_list() {
 ##################################################################
 
 perform_config() {
-    step 'perform cmakew config'
+    [ "$DEBUG" = 'true' ] && step 'perform cmakew config'
     
     unset GENERATOR_SET
     unset BUILD_DIR_SET
@@ -1514,7 +1513,7 @@ perform_config() {
 ##################################################################
 
 perform_build() {
-    step 'perform cmakew build'
+    [ "$DEBUG" = 'true' ] && step 'perform cmakew build'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         if run cmake --build "$BUILD_DIR" ; then
@@ -1537,7 +1536,7 @@ perform_install() {
         if [ "$BUILD_YES" != 1 ] ; then
             main build || return 1
         fi
-        step 'perform cmakew install'
+        [ "$DEBUG" = 'true' ] && step 'perform cmakew install'
         # https://stackoverflow.com/questions/34040522/is-there-a-cmake-install-switch/34040747
         if command_version_match ge 3.15.0 ; then
             run cmake --install "$BUILD_DIR"
@@ -1553,7 +1552,7 @@ perform_install() {
 ##################################################################
 
 perform_pack() {
-    step 'perform cmakew pack'
+    [ "$DEBUG" = 'true' ] && step 'perform cmakew pack'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         for item in CPackConfig.cmake CPackSourceConfig.cmake
@@ -1570,7 +1569,7 @@ perform_pack() {
 ##################################################################
 
 perform_test() {
-    step 'perform cmakew test'
+    [ "$DEBUG" = 'true' ] && step 'perform cmakew test'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         cd "$BUILD_DIR" || return 1
@@ -1583,7 +1582,7 @@ perform_test() {
 ##################################################################
 
 perform_clean() {
-    step 'perform cmakew clean'
+    [ "$DEBUG" = 'true' ] && step 'perform cmakew clean'
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         run rm -rf "'$BUILD_DIR'"
@@ -1651,13 +1650,11 @@ EOF
             -d) shift; DEBUG=true ;;
             --rc-file=*)
                 shift
-                RC_FILE=$(echo "$item" | cut -d= -f2)
+                RC_FILE=$(getvalue "$item")
                 if [ -z "$RC_FILE" ] ; then
                     die "--rc-file=FILE FILE must not empty."
                 else
-                    if ! exists file "$RC_FILE" ; then
-                        die "$item: file not exists."
-                    fi
+                    die_if_file_is_not_exist "$RC_FILE"
                 fi
                 ;;
             *)  shift; ACTION="$item"; break
@@ -1666,10 +1663,14 @@ EOF
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
-    step "load $RC_FILE"
+    if [ "$DEBUG" = 'true' ] ; then
+        step "load $RC_FILE"
+    fi
     if exists file "$RC_FILE" ; then
         if . "$RC_FILE" ; then
-            success "$RC_FILE loaded successfully."
+            if [ "$DEBUG" = 'true' ] ; then
+                success "$RC_FILE loaded successfully."
+            fi
         else
             die "$RC_FILE load failed."
         fi
