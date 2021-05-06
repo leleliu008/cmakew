@@ -38,4 +38,4 @@ jobs:
 
     - run: cd ../ctags & build.bat ${{ matrix.visual-studio-version }}
 
-    - run: cd ../ctags & output/bin/ctags --version
+    - run: cd ../ctags/output/bin & ctags --version
