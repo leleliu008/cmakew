@@ -10,13 +10,18 @@ jobs:
   test:
     runs-on: windows-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        visual-studio-version: [2017, 2019]
+
     defaults:
       run:
         shell: cmd /C {0}
 
     steps:
-    - run: choco install -y visualstudio2019buildtools
-    - run: choco install -y visualstudio2019-workload-vctools 
+    - run: choco install -y visualstudio${{ matrix.visual-studio-version }}buildtools
+    - run: choco install -y visualstudio${{ matrix.visual-studio-version }}-workload-vctools 
     - run: choco install -y pkgconfiglite
     - run: choco install -y patch
 
@@ -30,6 +35,6 @@ jobs:
     - run: cd ../ctags & patch -p1 -i patch/main-options.c.patch
     - run: cd ../ctags & patch -p1 -i patch/main-main.c.patch
 
-    - run: cd ../ctags & build.bat
+    - run: cd ../ctags & build.bat ${{ matrix.visual-studio-version }}
 
     - run: cd ../ctags & output/bin/ctags --version
