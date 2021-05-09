@@ -71,11 +71,6 @@ step() {
     echo "${COLOR_PURPLE}=>> STEP ${STEP_NUM} : ${STEP_MESSAGE} ${COLOR_OFF}"
 }
 
-title() {
-    echo
-    echo "${COLOR_PURPLE}=>> $@${COLOR_OFF}"
-}
-
 run() {
     info "$*"
     eval "$*"
@@ -127,6 +122,64 @@ trim() {
         fi
     fi
 }
+
+tolower() {
+    if [ $# -eq 0 ] ; then
+        if command -v tr > /dev/null ; then
+            tr A-Z a-z
+        elif command -v  awk > /dev/null ; then
+            awk '{print(tolower($0))}'
+        elif command -v gawk > /dev/null ; then
+            gawk '{print(tolower($0))}'
+        else
+            die "please install GNU CoreUtils or awk."
+        fi
+    else
+        if [ -z "$*" ] ; then
+            return 0
+        fi
+        if command -v tr > /dev/null ; then
+            echo "$*" | tr A-Z a-z
+        elif command -v  awk > /dev/null ; then
+            echo "$*" | awk '{print(tolower($0))}'
+        elif command -v gawk > /dev/null ; then
+            echo "$*" | gawk '{print(tolower($0))}'
+        elif command -v python > /dev/null ; then
+            python  -c 'import sys; print(sys.argv[1].lower());' "$*"
+        elif command -v python3 > /dev/null ; then
+            python3 -c 'import sys; print(sys.argv[1].lower());' "$*"
+        elif command -v python2 > /dev/null ; then
+            python2 -c 'import sys; print(sys.argv[1].lower());' "$*"
+        elif command -v perl > /dev/null ; then
+            perl -e 'print @ARGV[0],"\n"' "$1"
+        elif command -v node > /dev/null ; then
+            node -e 'console.log(process.argv[2].toLowerCase())' - "$*"
+        else
+            die "please install GNU CoreUtils or awk."
+        fi
+    fi
+}
+
+nproc() {
+    if command nproc --version > /dev/null 2>&1 ; then
+        command nproc
+    elif test -f /proc/cpuinfo ; then
+        grep -c processor /proc/cpuinfo
+    elif command -v sysctl > /dev/null ; then
+        sysctl -n machdep.cpu.thread_count
+    else
+        echo 4
+    fi
+}
+
+format_unix_timestamp() {
+   date -jf "%s" "$1" "$2" 2> /dev/null ||
+   date -d      "@$1" "$2"
+}
+
+# }}}
+##############################################################################
+# {{{ fetch
 
 __get_available_fetch_tool() {
     for item in curl wget http lynx aria2c axel
@@ -286,6 +339,10 @@ is_sha256sum_match() {
 die_if_sha256sum_mismatch() {
     is_sha256sum_match "$1" "$2" || die "sha256sum mismatch.\n    expect : $2\n    actual : $(sha256sum $1)"
 }
+
+# }}}
+##############################################################################
+# {{{ os
 
 __get_os_name_from_uname_a() {
     if command -v uname > /dev/null ; then
@@ -512,14 +569,9 @@ EOF
     fi
 }
 
-location_of_python_module() {
-    PIP_COMMAND=$(command -v pip3 || command -v pip)
-    if [ -z "$PIP_COMMAND" ] ; then
-        die "can't found pip command."
-    else
-        "$PIP_COMMAND" show $1 | grep 'Location:' | cut -d ' ' -f2
-    fi
-}
+# }}}
+##############################################################################
+# {{{ version
 
 version_of_python_module() {
     PIP_COMMAND=$(command -v pip3 || command -v pip)
@@ -700,6 +752,10 @@ command_version_match() {
     version_match "$(version_of_command "$1")" "$2" "$3"
 }
 
+# }}}
+##############################################################################
+# {{{ get_XX_package_name_by_command_name
+
 get_choco_package_name_by_command_name() {
     case $1 in
       cc|gcc) echo 'gcc-g++' ;;
@@ -722,10 +778,9 @@ get_choco_package_name_by_command_name() {
 
 get_pkg_add_package_name_by_command_name() {
     case $1 in
-      cc|gcc) echo 'gcc' ;;
-        make) echo 'gmake' ;;
-       gmake) echo 'gmake' ;;
+          cc) echo 'gcc'   ;;
          gm4) echo 'm4'    ;;
+        make) echo 'gmake' ;;
         perl) echo 'perl5' ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
@@ -743,20 +798,17 @@ get_pkg_add_package_name_by_command_name() {
     automake-1.16|autoheader-1.16)
               echo "automake-1.16.2" ;;
     autopoint) echo "gettext" ;;
-    pkg-config) 
-              echo "pkgconf" ;;
+    pkg-config) echo "pkgconf" ;;
         *) echo "$1"
     esac
 }
 
 get_pkgin_package_name_by_command_name() {
     case $1 in
-      cc|gcc) echo 'gcc' ;;
-        make) echo 'gmake' ;;
-       gmake) echo 'gmake' ;;
+          cc) echo 'gcc'   ;;
          gm4) echo 'm4'    ;;
+        make) echo 'gmake' ;;
         perl) echo 'perl5' ;;
-       gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
@@ -768,20 +820,17 @@ get_pkgin_package_name_by_command_name() {
     automake|autoheader)
               echo "automake" ;;
     autopoint) echo "gettext" ;;
-    pkg-config) 
-              echo "pkgconf" ;;
+    pkg-config) echo "pkgconf" ;;
         *) echo "$1"
     esac
 }
 
 get_pkg_package_name_by_command_name() {
     case $1 in
-      cc|gcc) echo 'gcc' ;;
-        make) echo 'gmake' ;;
-       gmake) echo 'gmake' ;;
+          cc) echo 'gcc'   ;;
          gm4) echo 'm4'    ;;
+        make) echo 'gmake' ;;
         perl) echo 'perl5' ;;
-       gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
@@ -793,17 +842,15 @@ get_pkg_package_name_by_command_name() {
     automake|autoheader)
               echo "automake" ;;
     autopoint) echo "gettext" ;;
-    pkg-config) 
-              echo "pkgconf" ;;
+    pkg-config) echo "pkgconf" ;;
         *) echo "$1"
     esac
 }
 
 get_emerge_package_name_by_command_name() {
     case $1 in
-      cc|gcc) echo 'gcc' ;;
+          cc) echo 'gcc' ;;
          gm4) echo 'm4'    ;;
-       gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
@@ -815,21 +862,20 @@ get_emerge_package_name_by_command_name() {
     automake|autoheader)
               echo "automake" ;;
     autopoint) echo "gettext" ;;
-    pkg-config) 
-              echo "pkgconf" ;;
+    pkg-config) echo "pkgconf" ;;
         *) echo "$1"
     esac
 }
 
 __get_pacman_package_name_by_command_name() {
     case $1 in
-        cc|gcc)
+          cc|gcc)
             case $NATIVE_OS_TYPE in
                 mingw32|mingw64) echo 'toolchain' ;;
                 *)               echo 'gcc'
             esac
             ;;
-        gm4)  echo 'm4'       ;;
+         gm4) echo 'm4'       ;;
         gsed) echo 'gnu-sed'  ;;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
@@ -841,8 +887,7 @@ __get_pacman_package_name_by_command_name() {
     automake|autoheader)
               echo "automake" ;;
     autopoint) echo "gettext" ;;
-    pkg-config) 
-              echo "pkgconf" ;;
+    pkg-config) echo "pkgconf" ;;
         *) echo "$1"
     esac
 }
@@ -1008,6 +1053,10 @@ get_brew_package_name_by_command_name() {
     esac
 }
 
+# }}}
+##############################################################################
+# {{{ __available_package_manager_list
+
 __available_package_manager_list() {
     if exists command brew ; then
         echo brew
@@ -1043,6 +1092,10 @@ __available_package_manager_list() {
         echo pkg_add
     fi
 }
+
+# }}}
+##############################################################################
+# {{{ __install_required
 
 # $1 package manager name
 # $2 package name
@@ -1333,6 +1386,15 @@ __print_required_or_optional_item() {
     esac
 }
 
+location_of_python_module() {
+    PIP_COMMAND=$(command -v pip3 || command -v pip)
+    if [ -z "$PIP_COMMAND" ] ; then
+        die "can't found pip command."
+    else
+        "$PIP_COMMAND" show $1 | grep 'Location:' | cut -d ' ' -f2
+    fi
+}
+
 __encode() {
     if [ $# -eq 0 ] ; then
         tr ' ' '|'
@@ -1443,7 +1505,9 @@ __print_optional_list() {
     fi
 }
 
-##################################################################
+# }}}
+##############################################################################
+# {{{ perform_*
 
 perform_config() {
     [ "$DEBUG" = 'true' ] && step 'perform cmakew config'
