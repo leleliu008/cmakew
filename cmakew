@@ -1148,7 +1148,7 @@ __install_command_via_package_manager() {
 # make
 __install_command_via_available_package_manager() {
     if required_command_exists_and_version_matched $@ ; then
-        printf "command %-10s %-10s ${COLOR_GREEN}FOUND${COLOR_OFF} %-8s %s\n" "$1" "$2 $3" "$(version_of_command $1)" "$(command -v $1)"
+        return 0
     else
         if [ -z "$AVAILABLE_PACKAGE_MANAGER_LIST" ] ; then
             AVAILABLE_PACKAGE_MANAGER_LIST=$(__available_package_manager_list)
@@ -1264,7 +1264,7 @@ __get_prebuild_binary_fetch_url_by_command_name() {
 # make
 __install_command() {
     if required_command_exists_and_version_matched $@ ; then
-        printf "command %-10s %-10s ${COLOR_GREEN}FOUND${COLOR_OFF} %-8s %s\n" "$1" "$2 $3" "$(version_of_command $1)" "$(command -v $1)"
+        return 0
     else
         unset PREBUILD_BINARY_FETCH_URL
         PREBUILD_BINARY_FETCH_URL=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
@@ -1311,7 +1311,6 @@ __handle_required_item() {
                     do
                         if required_command_exists_and_version_matched "$item" $2 $3 ; then
                             eval "REQUIRED_ITEM_$REQUIRED_ITEM_INDEX=$item"
-                            printf "command %-10s %-10s ${COLOR_GREEN}FOUND${COLOR_OFF} %-8s %s\n" "$item" "$2 $3" "$(version_of_command $item)" "$(command -v $item)"
                             return 0
                         fi
                     done
@@ -1459,13 +1458,9 @@ optional() {
     fi
 }
 
-__handle_required_list() { 
-    if [ "$DEBUG" = 'true' ] ; then
-        step "handle required"
-        echo "REQUIRED=$REQUIRED"
-        echo "OPTIONAL=$OPTIONAL"
-        echo
-    fi
+__handle_required_dependencies() {
+    [ "$DEBUG" = 'true' ] &&
+    step "handle required dependencies"
 
     for item in $REQUIRED
     do
@@ -1475,10 +1470,10 @@ __handle_required_list() {
     unset REQUIRED_ITEM_INDEX
 }
 
-__print_required_list() {
-    step "list required"
+__printf_required_dependencies() {
+    step "list required dependencies"
     if [ -z "$REQUIRED" ] ; then
-        warn "no required."
+        warn "no required dependencies."
     else
         printf "%-7s %-11s %-10s %-10s %s\n" TYPE NAME EXPECTED ACTUAL LOCATION
         for item in $REQUIRED
@@ -1490,10 +1485,10 @@ __print_required_list() {
     fi
 }
 
-__print_optional_list() {
-    step "list optional"
+__printf_optional_dependencies() {
+    step "list optional dependencies"
     if [ -z "$OPTIONAL" ] ; then
-        warn "no optional."
+        warn "no optional dependencies."
     else
         printf "%-7s %-11s %-10s %-10s %s\n" TYPE NAME EXPECTED ACTUAL LOCATION
         for item in $OPTIONAL
@@ -1657,10 +1652,9 @@ perform_clean() {
 ##################################################################
 
 main() {
-    echo "${COLOR_GREEN}cmake wrapper is desinged to help you using cmake easily.${COLOR_OFF}"
-
     case $1 in
         ''|-h|--help)
+        echo "${COLOR_GREEN}cmake wrapper is desinged to help you using cmake easily.${COLOR_OFF}"
         cat <<EOF
 
 Usage:
@@ -1724,6 +1718,8 @@ EOF
             *)  shift; ACTION="$item"; break
         esac
     done
+
+    exists command "perform_$ACTION" || die "$ACTION: don't recognized action."
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
@@ -1816,15 +1812,15 @@ EOF
         done
     fi
 
-    __handle_required_list || return 1
-    
+    __handle_required_dependencies || return 1
+
     if [ "$DEBUG" = 'true' ] ; then
-        __print_required_list
-        __print_optional_list
+        __printf_required_dependencies
+        __printf_optional_dependencies
     fi
 
     eval "perform_$ACTION $@" || return 1
-    
+
     if exists command "perform_${ACTION}_post" ; then
         eval "perform_${ACTION}_post $@" || return 1
     fi
