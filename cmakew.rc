@@ -8,7 +8,56 @@ perform_config_pre() {
     regist_dependency optional command rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
 }
 
+perform_docs_pre() {
+    regist_dependency required command python3:python:python3.5:python3.6:python3.7:python3.8:python3.9 ge 3.5
+    regist_dependency required command sphinx-build
+    regist_dependency required command make:gmake
+}
+
 perform_docs() {
-    handle_dependency required command python3:python:python3.5:python3.6:python3.7:python3.8:python3.9 ge 3.5
-    handle_dependency required command sphinx-build
+   run make -C docs $@
+}
+
+perform_fuzz_pre() {
+    regist_dependency required command zsh:bash:dash
+    regist_dependency required command valgrind
+}
+
+perform_fuzz() {
+    [ "$DEBUG" = 'true' ] && step 'perform cmakew fuzz'
+    if [ -f .cmakew ] ; then
+        . ./.cmakew || return 1
+
+        if [ "$BUILD_YES" != 1 ] ; then
+            main build || return 1
+        fi
+
+        SHELL=$(command -v zsh || command -v bash || command -v dash || die "no sutable shell found.")
+        CTAGS=$BUILD_DIR/ctags$EXEEXT
+        run "$SHELL" misc/units fuzz --ctags=$CTAGS --languages= --with-valgrind --run-shrink --with-timeout=10 Units
+    else
+        die "haven't configed. please run ./cmakew config first."
+    fi
+}
+
+perform_noise_pre() {
+    regist_dependency required command zsh:bash:dash
+    regist_dependency required command valgrind
+}
+
+perform_noise() {
+    [ "$DEBUG" = 'true' ] && step 'perform cmakew noise'
+    if [ -f .cmakew ] ; then
+        . ./.cmakew || return 1
+
+        if [ "$BUILD_YES" != 1 ] ; then
+            main build || return 1
+        fi
+
+        SHELL=$(command -v zsh || command -v bash || command -v dash || die "no sutable shell found.")
+        CTAGS=$BUILD_DIR/ctags$EXEEXT
+        run "$SHELL" misc/units noise --ctags=$CTAGS --languages= --with-valgrind --run-shrink --with-timeout=10 Units
+    else
+        die "haven't configed. please run ./cmakew config first."
+    fi
 }
