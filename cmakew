@@ -1106,7 +1106,7 @@ get_xbps_package_name_by_command_name() {
       ps2pdf) echo "ghostscript" ;;
       rst2man|rst2html)
               echo "python3-docutils" ;;
-    pip|pip3) echo "python3-pip"
+    pip|pip3) echo "python3-pip" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
