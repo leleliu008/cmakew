@@ -1874,12 +1874,12 @@ Usage:
 ./cmakew -h | --help             -- show help    of this command
 ./cmakew -V | --version          -- show version of this command
 
-./cmakew [ -x | -d | -rc-file=FILE ] config  [option]...   -- generate config cache
-./cmakew [ -x | -d | -rc-file=FILE ] build   [option]...   -- build configed
-./cmakew [ -x | -d | -rc-file=FILE ] install [option]...   -- install prebuild to destination
-./cmakew [ -x | -d | -rc-file=FILE ] pack    [option]...   -- pack source and binary archive
-./cmakew [ -x | -d | -rc-file=FILE ] test    [option]...   -- run tests
-./cmakew [ -x | -d | -rc-file=FILE ] clean                 -- remove build dir
+./cmakew config  [ -x | -d | -rc-file=FILE ] [option]...   -- generate config cache
+./cmakew build   [ -x | -d | -rc-file=FILE ] [option]...   -- build configed
+./cmakew install [ -x | -d | -rc-file=FILE ] [option]...   -- install prebuild to destination
+./cmakew pack    [ -x | -d | -rc-file=FILE ] [option]...   -- pack source and binary archive
+./cmakew test    [ -x | -d | -rc-file=FILE ] [option]...   -- run tests
+./cmakew clean   [ -x | -d | -rc-file=FILE ]               -- remove build dir
 EOF
         return 0
         ;;
@@ -1913,23 +1913,28 @@ EOF
     unset RC_FILE
 
     unset ACTION
+    ACTION="$1"
 
-    for item in $@
+    shift
+
+    unset ACTION_ARGS
+
+    while [ -n "$1" ]
     do
-        case $item in
-            -x) shift; set -x ;;
-            -d) shift; DEBUG=true ;;
+        case $1 in
+            -x) set -x ;;
+            -d) DEBUG=true ;;
             --rc-file=*)
-                shift
-                RC_FILE=$(getvalue "$item")
+                RC_FILE=$(getvalue "$1")
                 if [ -z "$RC_FILE" ] ; then
                     die "--rc-file=FILE FILE must not empty."
                 else
                     die_if_file_is_not_exist "$RC_FILE"
                 fi
                 ;;
-            *)  shift; ACTION="$item"; break
+            *)  ACTION_ARGS="$ACTION_ARGS $1"
         esac
+        shift
     done
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
@@ -1998,7 +2003,7 @@ EOF
     fi
 
     if command_exists "perform_${ACTION}_pre" ; then
-        eval "perform_${ACTION}_pre $@" || return 1
+        eval "perform_${ACTION}_pre $ACTION_ARGS" || return 1
     fi
 
     if [ "$DEBUG" = 'true' ] ; then
@@ -2032,10 +2037,10 @@ EOF
         __printf_optional_dependencies
     fi
 
-    eval "perform_$ACTION $@" || return 1
+    eval "perform_$ACTION $ACTION_ARGS" || return 1
 
     if command_exists "perform_${ACTION}_post" ; then
-        eval "perform_${ACTION}_post $@" || return 1
+        eval "perform_${ACTION}_post $ACTION_ARGS" || return 1
     fi
 }
 

@@ -36,7 +36,7 @@ jobs:
 
       - run: |
             cd ctags
-            ./cmakew -d config \
+            ./cmakew config -d \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=./output/mingw \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
@@ -44,5 +44,5 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=./cmake/toolchain/${{ matrix.target }}.cmake \
             -Wno-dev
 
-      - run: cd ctags && ./cmakew -d install
+      - run: cd ctags && ./cmakew install -d
       - run: cd ctags && file ./output/mingw/bin/ctags.exe | grep PE32

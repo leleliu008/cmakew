@@ -35,7 +35,7 @@ jobs:
 
       - run: |
             cd ctags
-            ./cmakew -d config \
+            ./cmakew config -d \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_INSTALL_PREFIX=./output/android \
                 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
@@ -47,5 +47,5 @@ jobs:
                 -DANDROID_PLATFORM=21 \
                 -Wno-dev
 
-      - run: cd ctags && ./cmakew -d install
+      - run: cd ctags && ./cmakew install -d
       - run: cd ctags && file ./output/android/bin/ctags | grep ELF

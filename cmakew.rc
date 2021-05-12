@@ -15,7 +15,8 @@ perform_docs_pre() {
 }
 
 perform_docs() {
-   run make -C docs $@
+    [ "$DEBUG" = 'true' ] && step 'perform cmakew docs'
+    run make -C docs $@
 }
 
 perform_fuzz_pre() {

@@ -41,7 +41,7 @@ jobs:
             patch -p1 < "$item" || return 1
           done
 
-    - run: cd ctags && ./cmakew -d config -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-    - run: cd ctags && ./cmakew -d install
+    - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    - run: cd ctags && ./cmakew install -d
     - run: file /usr/bin/ctags
     - run: /usr/bin/ctags --version

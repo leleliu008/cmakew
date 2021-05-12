@@ -22,27 +22,36 @@ chmod +x cmakew
 
 *   generate config
 
-        ./cmakew [ -x | -d | --rc-file=FILE ] config [ -DCMAKE_INSTALL_PREFIX=/usr | -DCMAKE_BUILD_TYPE=Release | ... ]
+        ./cmakew config [ -x | -d | --rc-file=FILE ] [ -DCMAKE_INSTALL_PREFIX=/usr | -DCMAKE_BUILD_TYPE=Release | -B DIR | ... ]
 
 *   clean the cached config
 
-        ./cmakew [ -x | -d | --rc-file=FILE ] clean
+        ./cmakew clean [ -x | -d | --rc-file=FILE ]
 
 *   build
 
-        ./cmakew [ -x | -d | --rc-file=FILE ] build
+        ./cmakew build [ -x | -d | --rc-file=FILE ]
 
 *   install
 
-        ./cmakew [ -x | -d | --rc-file=FILE ] install
+        ./cmakew install [ -x | -d | --rc-file=FILE ]
 
 *   pack
 
-        ./cmakew [ -x | -d | --rc-file=FILE ] pack
+        ./cmakew pack [ -x | -d | --rc-file=FILE ]
 
 *   run tests
 
-        ./cmakew [ -x | -d | --rc-file=FILE ] test
+        ./cmakew test [ -x | -d | --rc-file=FILE ]
+
+
+## zsh-completion for cmakew
+I have provided a zsh-completion script for `cmakew`. when you've typed `./cmakew` then type `TAB` key, it will auto complete the rest for you.
+
+```
+curl -L -o /usr/local/share/zsh/site-functions/_cmakew https://raw.githubusercontent.com/leleliu008/cmakew/master/zsh-completion/_cmakew
+```
+**Note**: to apply this feature, you may need to run the command `autoload -U compinit && compinit`
 
 
 ## cmakew.rc
@@ -52,14 +61,14 @@ a typical example of this file looks like as follows:
 
 ```bash
 perform_config_pre() {
-    required command cc:gcc:clang
-    required command pkg-config ge 0.18
-    required command perl
-    required command python3:python:python3.5:python3.6:python3.7:python3.8:python3.9 ge 3.5
-    optional command rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
+    regist_dependency required command cc:gcc:clang
+    regist_dependency required command pkg-config ge 0.18
+    regist_dependency required command perl
+    regist_dependency required command python3:python:python3.5:python3.6:python3.7:python3.8:python3.9 ge 3.5
+    regist_dependency optional command rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
 }
 
-perform_XX() {
+perform_xxxx() {
     # do whatever you want."
 }
 ```
@@ -67,10 +76,9 @@ perform_XX() {
 `perform_xxxx` is declared a subcommand of `cmakew` called `xxxx`, we can invoke it via run following command:
 
 ```
-./cmakew    xxxx
-./cmakew -x xxxx
-./cmakew -d xxxx
+./cmakew xxxx [ -x | -d | --rc-file=FILE ]
 ```
+**Note**: `clean` `config` `build` `install` `pack` `test` have been used, if you redeclare these functions, origin function will be overrided.
 
 ### the function can be declared in `autogen.rc`
 |function|overview|
@@ -80,10 +88,9 @@ perform_XX() {
 |`perform_XX_post(){}`|`XX = config/build/install/clean/pack/test`<br>run after `perform_XX(){}`|
 
 ### the function can be invoked in `perform_XX_pre`
-|function|overview|
-|-|-|
-|`required TYPE NAME [OP VERSION]`|declare required `command` / `perl` / `python` modules.|
-|`optional TYPE NAME [OP VERSION]`|declare optional `command` / `perl` / `python` modules.|
+```
+regist_dependency <required|optional> <command|python|python2|python3|perl> NAME [OP VERSION]
+```
 
 ### the function can be invoked in `cmakew.rc`
 |function|example|

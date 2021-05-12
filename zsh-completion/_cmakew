@@ -1,0 +1,124 @@
+#compdef cmakew
+
+_cmakew_subcommands=(
+    '-h:print the help infomation of cmakew command'
+    '--help:print the help infomation of cmakew command'
+    '-V:print the version of cmakew'
+    '--version:print the version of cmakew'
+    'clean:remove build dir'
+    'config:generate config cache'
+    'build:build'
+    'install:install build to destination'
+    'pack:pack source and binary archive'
+    'test:run tests'
+    'docs:generates docs'
+)
+
+_cmakew_docs_subcommands=(
+    'html:make standalone HTML files'
+    'dirhtml:make HTML files named index.html in directories'
+    'singlehtml:make a single large HTML file'
+    'pickle:make pickle files'
+    'json:make JSON files'
+    'htmlhelp:make HTML files and a HTML help project'
+    'qthelp:make HTML files and a qthelp project'
+    'devhelp:make HTML files and a Devhelp project'
+    'epub:make an epub'
+    'latex:make LaTeX files, you can set PAPER=a4 or PAPER=letter'
+    'latexpdf:make LaTeX files and run them through pdflatex'
+    'latexpdfja:make LaTeX files and run them through platex/dvipdfmx'
+    'text:make text files'
+    'man:make manual pages'
+    'texinfo:make Texinfo files'
+    'info:make Texinfo files and run them through makeinfo'
+    'gettext:make PO message catalogs'
+    'changes:make an overview of all changed/added/deprecated items'
+    'xml:make Docutils-native XML files'
+    'pseudoxml:make pseudoxml-XML files for display purposes'
+    'linkcheck:check all external links for integrity'
+    'doctest:run all doctests embedded in the documentation (if enabled)'
+)
+
+_cmakew_clean() {
+    _arguments \
+        '-x[xtrace]' \
+        '-d[debug]' \
+        '-rc-file=[sepecify rc-file]:rc-file:{_files -g "*.rc"}'
+}
+
+_cmakew_config() {
+    _arguments \
+        '-x[xtrace]' \
+        '-d[debug]' \
+        '-rc-file=[sepecify rc-file]:rc-file:{_files -g "*.rc"}' \
+        '-B+[specify build dir]:build-dir:_files -/' \
+        '-DCMAKE_INSTALL_PREFIX=[specify install dir]:install-dir:_files -/' \
+        '-DCMAKE_BUILD_TYPE=[specify build type]:build-type:(Debug Release MinSizeRel RelWithDebInfo)'
+}
+
+_cmakew_build() {
+    _arguments \
+        '-x[xtrace]' \
+        '-d[debug]' \
+        '-rc-file=[sepecify rc-file]:rc-file:{_files -g "*.rc"}'
+}
+
+_cmakew_install() {
+    _arguments \
+        '-x[xtrace]' \
+        '-d[debug]' \
+        '-rc-file=[sepecify rc-file]:rc-file:{_files -g "*.rc"}'
+}
+
+_cmakew_docs() {
+    _arguments \
+        '1: :{_describe 'docs_subcommands' _cmakew_docs_subcommands}' \
+        '*:: :->docs_option'
+
+    if [ "$state" = 'docs_option' ] ; then
+        _arguments \
+            '-x[xtrace]' \
+            '-d[debug]' \
+            '-rc-file=[sepecify rc-file]:rc-file:{_files -g "*.rc"}'
+    fi
+}
+
+_cmakew_test() {
+    _arguments \
+        '-x[xtrace]' \
+        '-d[debug]' \
+        '-rc-file=[sepecify rc-file]:rc-file:{_files -g "*.rc"}' \
+        '-R+[specify which test to run]:which:(man roudtrip)' \
+        '--timeout+[specify timeout in seconds]:timeout:(10)'
+}
+
+_cmakew_pack() {
+    _arguments \
+        '-x[xtrace]' \
+        '-d[debug]' \
+        '-rc-file=[sepecify rc-file]:rc-file:{_files -g "*.rc"}'
+}
+
+
+function _cmakew() {
+    local context state state_descr line
+    typeset -A opt_args
+
+    _arguments \
+        '1: :{_describe 'cmakew_subcommand' _cmakew_subcommands}' \
+        '*:: :->option'
+
+    if [ "$state" = 'option' ] ; then
+        case $words[1] in
+            clean)     _cmakew_clean   ;;
+            config)    _cmakew_config  ;;
+            build)     _cmakew_build   ;;
+            install)   _cmakew_install ;;
+            test)      _cmakew_test    ;;
+            docs)      _cmakew_docs    ;;
+            pack)      _cmakew_pack    ;;
+        esac
+    fi
+}
+
+_cmakew "$@"
