@@ -1164,6 +1164,7 @@ get_zypper_package_name_by_command_name() {
               echo "python3-docutils" ;;
     sphinx-build)
               echo "python3-Sphinx" ;;
+    pip3|pip) echo "python3-pip" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1498,16 +1499,14 @@ __install_command() {
         unset __PREBUILD_BINARY_FETCH_URL__
         __PREBUILD_BINARY_FETCH_URL__=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
         if [ -z "$__PREBUILD_BINARY_FETCH_URL__" ] ; then
-            unset __PIP3_PACKAGE_NAME__
-            __PIP3_PACKAGE_NAME__="$(get_pip3_package_name_by_command_name "$1")"
-            if [ -z "$__PIP3_PACKAGE_NAME__" ] ; then
+            if [ -z "$(get_pip3_package_name_by_command_name "$1")" ] ; then
                 __install_command_via_available_package_manager $@
             else
                 handle_dependency required command pip3:pip
                 if   command_exists pip3 ; then
-                    __install_package_via_package_manager pip3 "$__PIP3_PACKAGE_NAME__"
+                    __install_package_via_package_manager pip3 "$(get_pip3_package_name_by_command_name "$1")"
                 elif command_exists pip ; then
-                    __install_package_via_package_manager pip  "$__PIP3_PACKAGE_NAME__"
+                    __install_package_via_package_manager pip  "$(get_pip3_package_name_by_command_name "$1")"
                 else
                     die "please install pip3."
                 fi
