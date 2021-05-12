@@ -1007,6 +1007,8 @@ get_pkg_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
+      rst2man|rst2html)
+              echo "py37-docutils" ;;
     libtool|libtoolize|glibtool|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1025,7 +1027,10 @@ get_emerge_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-    sphinx-build) echo "sphinx" ;;
+      rst2man|rst2html)
+              echo "docutils" ;;
+    sphinx-build)
+              echo "sphinx" ;;
     libtool|libtoolize|glibtool|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1049,7 +1054,10 @@ __get_pacman_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-    sphinx-build) echo "python-sphinx" ;;
+      rst2man|rst2html)
+              echo "python-docutils" ;;
+    sphinx-build)
+              echo "python-sphinx" ;;
     libtool|libtoolize|glibtool|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1096,6 +1104,8 @@ get_xbps_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
+      rst2man|rst2html)
+              echo "python3-docutils" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1115,7 +1125,10 @@ get_apk_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-    sphinx-build) echo "sphinx" ;;
+      rst2man|rst2html)
+              echo "py3-docutils" ;;
+    sphinx-build)
+              echo "sphinx" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1135,7 +1148,10 @@ get_zypper_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-    sphinx-build) echo "python3-Sphinx" ;;
+      rst2man|rst2html)
+              echo "python3-docutils" ;;
+    sphinx-build)
+              echo "python3-Sphinx" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1155,7 +1171,10 @@ get_dnf_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-    sphinx-build) echo "python-sphinx" ;;
+      rst2man|rst2html)
+              echo "python3-docutils" ;;
+    sphinx-build)
+              echo "python-sphinx" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1197,7 +1216,10 @@ get_apt_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-    sphinx-build) echo "python3-sphinx" ;;
+      rst2man|rst2html)
+              echo "python3-docutils" ;;
+    sphinx-build)
+              echo "python3-sphinx" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1216,7 +1238,10 @@ get_brew_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-    sphinx-build) echo "sphinx-doc" ;;
+     rst2man.py|rst2html.py)
+              echo "docutils" ;;
+    sphinx-build)
+              echo "sphinx-doc" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1232,7 +1257,8 @@ get_pip3_package_name_by_command_name() {
 
 get_pip_package_name_by_command_name() {
     case $1 in
-        sphinx-build) echo "sphinx" ;;
+        sphinx-build) echo "sphinx"   ;;
+        rst2man.py)   echo "docutils" ;;
     esac
 }
 

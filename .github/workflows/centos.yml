@@ -41,7 +41,7 @@ jobs:
       - run: file /usr/local/bin/ctags
       - run: /usr/local/bin/ctags --version
       - run: cd ctags && ./cmakew docs -d
-      - run: cd ctags && ./cmakew test -d
+      - run: cd ctags && ./cmakew test -d -V --debug
 
   test_6_10:
     runs-on: ubuntu-20.04
@@ -90,4 +90,4 @@ jobs:
       - run: file /usr/local/bin/ctags
       - run: /usr/local/bin/ctags --version
       - run: cd ctags && ./cmakew docs -d
-      - run: cd ctags && ./cmakew test -d
+      - run: cd ctags && ./cmakew test -d -V --debug
