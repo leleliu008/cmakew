@@ -937,6 +937,7 @@ get_choco_package_name_by_command_name() {
        gmake) echo 'make' ;;
          gm4) echo 'm4'    ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -958,6 +959,7 @@ get_pkg_add_package_name_by_command_name() {
         perl) echo 'perl5' ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -984,6 +986,7 @@ get_pkgin_package_name_by_command_name() {
         make) echo 'gmake' ;;
         perl) echo 'perl5' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1004,6 +1007,7 @@ get_pkg_package_name_by_command_name() {
         make) echo 'gmake' ;;
         perl) echo 'perl5' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1024,6 +1028,7 @@ get_emerge_package_name_by_command_name() {
           cc) echo 'gcc' ;;
          gm4) echo 'm4'    ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1051,6 +1056,7 @@ __get_pacman_package_name_by_command_name() {
             ;;
          gm4) echo 'm4'       ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1101,6 +1107,7 @@ get_xbps_package_name_by_command_name() {
          gm4) echo 'm4'    ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1123,6 +1130,7 @@ get_apk_package_name_by_command_name() {
          gm4) echo 'm4'    ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1146,6 +1154,7 @@ get_zypper_package_name_by_command_name() {
          gm4) echo 'm4'    ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1169,6 +1178,7 @@ get_dnf_package_name_by_command_name() {
          gm4) echo 'm4'    ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1191,6 +1201,7 @@ get_yum_package_name_by_command_name() {
          gm4) echo 'm4'    ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1214,6 +1225,7 @@ get_apt_package_name_by_command_name() {
          gm4) echo 'm4'    ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1236,6 +1248,7 @@ get_brew_package_name_by_command_name() {
          gm4) echo 'm4'    ;;
        gperf) echo 'gperf' ;;
         gsed) echo 'gnu-sed'  ;;
+        find) echo 'findutils';;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
@@ -1963,6 +1976,10 @@ EOF
         esac
         shift
     done
+
+    handle_dependency required command sed:gsed
+    handle_dependency required command grep
+    handle_dependency required command find
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
