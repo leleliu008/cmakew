@@ -1065,6 +1065,7 @@ __get_pacman_package_name_by_command_name() {
               echo "python-docutils" ;;
     sphinx-build)
               echo "python-sphinx" ;;
+    pip3|pip) echo "python-pip"
     libtool|libtoolize|glibtool|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1234,6 +1235,7 @@ get_apt_package_name_by_command_name() {
               echo "python3-docutils" ;;
     sphinx-build)
               echo "python3-sphinx" ;;
+    pip3|pip) echo "python3-pip" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
