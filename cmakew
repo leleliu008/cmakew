@@ -802,6 +802,7 @@ version_of_command() {
      awk|gawk) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f3 | tr , ' ' ;;
      sed|gsed) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f4 ;;
          cpan) ;;
+         find) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f4 ;;
          grep) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f4 | cut -d '-' -f1 ;;
          ruby) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f2 ;;
          perl) "$1" -v | sed -n '2p' | sed 's/.*v\([0-9]\.[0-9][0-9]\.[0-9]\).*/\1/' ;;
@@ -1290,7 +1291,7 @@ __add_available_package_manager() {
 
 __get_available_package_manager_list() {
     if [ -z "$AVAILABLE_PACKAGE_MANAGER_LIST" ] ; then
-        for item in pip3 pip brew apt dnf yum zypper apk xbps-install emerge pacman choco pkg pkgin pkg_add
+        for item in brew apt dnf zypper apk xbps-install emerge pacman choco pkg pkgin pkg_add
         do
             case $item in
                 apt)
@@ -1298,6 +1299,13 @@ __get_available_package_manager_list() {
                         __add_available_package_manager apt apt
                     else
                         __add_available_package_manager apt-get apt-get
+                    fi
+                    ;;
+                dnf)
+                    if command_exists dnf ; then
+                        __add_available_package_manager dnf dnf
+                    else
+                        __add_available_package_manager yum yum
                     fi
                     ;;
                 xbps-install)
@@ -1485,12 +1493,25 @@ __install_command() {
     if command_exists_and_version_matched $@ ; then
         return 0
     else
-        unset PREBUILD_BINARY_FETCH_URL
-        PREBUILD_BINARY_FETCH_URL=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
-        if [ -z "$PREBUILD_BINARY_FETCH_URL" ] ; then
-            __install_command_via_available_package_manager $@
+        unset __PREBUILD_BINARY_FETCH_URL__
+        __PREBUILD_BINARY_FETCH_URL__=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
+        if [ -z "$__PREBUILD_BINARY_FETCH_URL__" ] ; then
+            unset __PIP3_PACKAGE_NAME__
+            __PIP3_PACKAGE_NAME__="$(get_pip3_package_name_by_command_name "$1")"
+            if [ -z "$__PIP3_PACKAGE_NAME__" ] ; then
+                __install_command_via_available_package_manager $@
+            else
+                handle_dependency required command pip3:pip
+                if   command_exists pip3 ; then
+                    __install_package_via_package_manager pip3 "$__PIP3_PACKAGE_NAME__"
+                elif command_exists pip ; then
+                    __install_package_via_package_manager pip  "$__PIP3_PACKAGE_NAME__"
+                else
+                    die "please install pip3."
+                fi
+            fi
         else
-            __install_command_via_fetch_prebuild_binary "$PREBUILD_BINARY_FETCH_URL" $@
+            __install_command_via_fetch_prebuild_binary "$__PREBUILD_BINARY_FETCH_URL__" $@
         fi
     fi
 }
@@ -1977,13 +1998,17 @@ EOF
         shift
     done
 
-    if [ "$DEBUG" = 'true' ] ; then
-        step "handle the essential tools"
-    fi
     regist_dependency required command sed:gsed
     regist_dependency required command grep
     regist_dependency required command find
-    __handle_required_dependencies || return 1
+
+    if [ "$DEBUG" = 'true' ] ; then
+        step "handle essential tools"
+    fi
+    for item in $REQUIRED_DEPENDENCY_LIST
+    do
+        handle_dependency $(__decode_dependency "$item") || return 1
+    done
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
