@@ -45,3 +45,5 @@ jobs:
     - run: cd ctags && ./cmakew install -d
     - run: file /usr/bin/ctags
     - run: /usr/bin/ctags --version
+    - run: cd ctags && ./cmakew docs -d
+    - run: cd ctags && ./cmakew test -d
