@@ -39,5 +39,5 @@ jobs:
           run ./cmakew install -d
           run file /usr/local/bin/ctags
           run /usr/local/bin/ctags --version
-          run ./cmakew docs -d
+          run ./cmakew docs html -d
           run ./cmakew test -d -V --debug

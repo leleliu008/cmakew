@@ -33,5 +33,5 @@ jobs:
     - run: cd ctags && sudo ./cmakew install -d
     - run: sudo file /usr/local/bin/ctags
     - run: sudo /usr/local/bin/ctags --version
-    - run: cd ctags && ./cmakew docs -d
+    - run: cd ctags && ./cmakew docs html -d
     - run: cd ctags && ./cmakew test -d -V --debug

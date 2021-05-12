@@ -1106,6 +1106,7 @@ get_xbps_package_name_by_command_name() {
       ps2pdf) echo "ghostscript" ;;
       rst2man|rst2html)
               echo "python3-docutils" ;;
+    pip|pip3) echo "python3-pip"
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1240,8 +1241,6 @@ get_brew_package_name_by_command_name() {
       ps2pdf) echo "ghostscript" ;;
      rst2man.py|rst2html.py)
               echo "docutils" ;;
-    sphinx-build)
-              echo "sphinx-doc" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1278,12 +1277,14 @@ __add_available_package_manager() {
 
 __get_available_package_manager_list() {
     if [ -z "$AVAILABLE_PACKAGE_MANAGER_LIST" ] ; then
-        for item in brew pip3 pip apt-get apt dnf yum zypper apk xbps-install emerge pacman choco pkg pkgin pkg_add
+        for item in pip3 pip brew apt dnf yum zypper apk xbps-install emerge pacman choco pkg pkgin pkg_add
         do
             case $item in
                 apt)
-                    if apt show apt > /dev/null 2>&1 ; then
+                    if command_exists apt && apt show apt > /dev/null 2>&1 ; then
                         __add_available_package_manager apt apt
+                    else
+                        __add_available_package_manager apt-get apt-get
                     fi
                     ;;
                 xbps-install)
@@ -1434,7 +1435,7 @@ __install_command_via_fetch_prebuild_binary() {
         export PATH="$PREBUILD_BINARY_UNPACK_DIR/$2/bin:$PATH"
     fi
     if [ "$NATIVE_OS_KIND" = 'darwin' ] ; then
-        for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -d 4 -type d -name bin)
+        for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -type d -name bin)
         do
             export PATH="$item:$PATH"
         done
@@ -2015,17 +2016,10 @@ EOF
     PREBUILD_BINARY_UNPACK_DIR="$PREBUILD_BINARY_CACHED_DIR/unpack"
 
     if [ -d "$PREBUILD_BINARY_UNPACK_DIR" ] ; then
-        for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -d 2 -type d -name bin)
+        for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -type d -name bin)
         do
             export PATH="$item:$PATH"
         done
-
-        if [ "$NATIVE_OS_KIND" = 'darwin' ] ; then
-            for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -d 4 -type d -name bin)
-            do
-                export PATH="$item:$PATH"
-            done
-        fi
     fi
 
     if command_exists "perform_${ACTION}_pre" ; then

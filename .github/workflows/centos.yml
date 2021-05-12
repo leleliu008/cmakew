@@ -40,7 +40,7 @@ jobs:
       - run: cd ctags && ./cmakew install -d
       - run: file /usr/local/bin/ctags
       - run: /usr/local/bin/ctags --version
-      - run: cd ctags && ./cmakew docs -d
+      - run: cd ctags && ./cmakew docs html -d
       - run: cd ctags && ./cmakew test -d -V --debug
 
   test_6_10:
@@ -89,5 +89,5 @@ jobs:
       - run: cd ctags && ./cmakew install -d
       - run: file /usr/local/bin/ctags
       - run: /usr/local/bin/ctags --version
-      - run: cd ctags && ./cmakew docs -d
+      - run: cd ctags && ./cmakew docs html -d
       - run: cd ctags && ./cmakew test -d -V --debug
