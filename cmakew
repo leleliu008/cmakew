@@ -1977,9 +1977,13 @@ EOF
         shift
     done
 
-    handle_dependency required command sed:gsed
-    handle_dependency required command grep
-    handle_dependency required command find
+    if [ "$DEBUG" = 'true' ] ; then
+        step "handle the essential tools"
+    fi
+    regist_dependency required command sed:gsed
+    regist_dependency required command grep
+    regist_dependency required command find
+    __handle_required_dependencies || return 1
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
 
