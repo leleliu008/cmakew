@@ -784,6 +784,8 @@ version_of_command() {
         xmlto) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f3 ;;
       xmllint) ;;
      xsltproc) ;;
+     rst2man|rst2man.py|rst2man-3|rst2man-3.6|rst2man-3.7|rst2man-3.8|rst2man-3.9)
+               "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f3 ;;
          gzip) "$1" --version 2>&1 | head -n 1 | awk '{print($NF)}' ;;
          lzip) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f2 ;;
            xz) "$1" --version 2> /dev/null | head -n 1 | cut -d ' ' -f4 ;;
@@ -1530,6 +1532,14 @@ __install_command() {
                 __install_command_via_available_package_manager $@
             else
                 handle_dependency required command pip3:pip
+
+                unset __PIP_COMMAND__
+                __PIP_COMMAND__"=$(command -v pip3.8)"
+
+                if [ -n "$__PIP_COMMAND__" ] ; then
+                    $sudo ln -sf "$__PIP_COMMAND__" /usr/local/bin/pip3
+                fi
+
                 if   command_exists pip3 ; then
                     __install_package_via_package_manager pip3 "$(get_pip3_package_name_by_command_name "$1")"
                 elif command_exists pip ; then
