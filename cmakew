@@ -190,17 +190,17 @@ format_unix_timestamp() {
 # md5sum < FILE
 md5sum() {
     if [ $# -eq 0 ] ; then
-        if   command md5sum --version > /dev/null 2>&1 ; then
+        if echo | command md5sum > /dev/null 2>&1 ; then
              command md5sum | cut -d ' ' -f1
         elif command -v openssl > /dev/null ; then
              openssl md5 | rev | cut -d ' ' -f1 | rev
         else
-            die "please install openssl or GNU CoreUtils."
+            return 1
         fi
     else
         if command -v openssl > /dev/null ; then
              openssl md5    "$1" | cut -d ' ' -f2
-        elif command md5sum --version > /dev/null 2>&1 ; then
+        elif echo | command md5sum > /dev/null 2>&1 ; then
              command md5sum "$1" | cut -d ' ' -f1
         else
             die "please install openssl or GNU CoreUtils."
@@ -218,18 +218,18 @@ md5sum() {
 # sha256sum < FILE
 sha256sum() {
     if [ $# -eq 0 ] ; then
-        if   command sha256sum --version > /dev/null 2>&1 ; then
+        if echo | command sha256sum > /dev/null 2>&1 ; then
              command sha256sum | cut -d ' ' -f1
         elif command -v openssl > /dev/null ; then
              openssl sha256 | rev | cut -d ' ' -f1 | rev
         else
-            die "please install openssl or GNU CoreUtils."
+            return 1
         fi
     else
         die_if_file_is_not_exist "$1"
         if command -v openssl > /dev/null ; then
              openssl sha256    "$1" | cut -d ' ' -f2
-        elif command sha256sum --version > /dev/null 2>&1 ; then
+        elif echo | command sha256sum > /dev/null 2>&1 ; then
              command sha256sum "$1" | cut -d ' ' -f1
         else
             die "please install openssl or GNU CoreUtils."
@@ -1149,7 +1149,8 @@ get_apk_package_name_by_command_name() {
       rst2man|rst2html)
               echo "py3-docutils" ;;
     sphinx-build)
-              echo "sphinx" ;;
+              echo "sphinx"  ;;
+    pip3|pip) echo 'py3-pip' ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
