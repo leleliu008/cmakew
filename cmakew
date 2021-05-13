@@ -1349,17 +1349,15 @@ __get_available_package_manager_list() {
 # $2 package name
 __install_package_via_package_manager() {
     case $1 in
-        pip3) if [ "$NATIVE_OS_KIND" = 'darwin' ] ; then
-                 run pip3 install        -U "$2"
-              else
-                 run pip3 install --user -U "$2"
-              fi
+        pip3) case $NATIVE_OS_KIND in
+                *bsd|linux) run pip3 install --user -U "$2" ;;
+                *)          run pip3 install        -U "$2"
+              esac
               ;;
-        pip)  if [ "$NATIVE_OS_KIND" = 'darwin' ] ; then
-                 run pip  install        -U "$2"
-              else
-                 run pip  install --user -U "$2"
-              fi
+        pip)  case $NATIVE_OS_KIND in
+                *bsd|linux) run pip  install --user -U "$2" ;;
+                *)          run pip  install        -U "$2"
+              esac
               ;;
         pkg)     run $sudo pkg install -y "$2" ;;
         pkgin)   run $sudo pkgin -y install "$2" ;;

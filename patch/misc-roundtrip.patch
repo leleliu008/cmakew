@@ -1,0 +1,28 @@
+--- a/misc/roundtrip
++++ b/misc/roundtrip
+@@ -126,7 +126,7 @@ IFS='
+ 
+ tagfiles=$(find "$UNITS" -name expected.tags)
+ for tags in $tagfiles; do
+-    tagnames=$(sed -e 's/^\([^	]*\)	.*/\1/' "$tags" | limit_entries)
++    tagnames=$(cut -f1 < "$tags" | limit_entries)
+     for name in $tagnames; do
+ 	# Yes, there is a reason for this craziness.  We need to properly
+ 	# handle embedded newlines (expanded from "\n"), including trailing
+@@ -135,9 +135,13 @@ for tags in $tagfiles; do
+ 	# remove it, plus the extra newline, using variable substitutions.
+ 	# Note: we use "printf '%s\n'" instead of "echo" because Dash's "echo"
+ 	# unconditionally expands some sequences, like "\t" and alike.
+-	t="$(printf '%s\n' "$name" | expandEscapeSequences; printf _)"
+-	t="${t%
+-_}"
++    if [ "$name" = "\r" ] ; then
++        t="$(printf "\r")"
++    elif [ "$name" = "\n" ] ; then
++        t="$IFS"
++    else
++        t="$(printf '%s\n' "$name" | expandEscapeSequences)"
++    fi
+ 	if [ 1 -gt $("${READTAGS}" -t "$tags" - "$t" | wc -l) ]; then
+ 	    printf 'FAILED: "%s" -t "%s" - "%s"\n' "${READTAGS}" "$tags" "$t"
+ 	    printf '	The raw tag name was "%s"\n' "$name"
