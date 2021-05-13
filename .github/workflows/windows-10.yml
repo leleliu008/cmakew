@@ -20,8 +20,15 @@ jobs:
         shell: cmd /C {0}
 
     steps:
+    # https://github.com/jberezanski/ChocolateyPackages/issues/97
+    - run: choco upgrade    visualstudio2019enterprise
+
     - run: choco install -y visualstudio${{ matrix.visual-studio-version }}buildtools
+      if:  ${{ matrix.visual-studio-version == 2017 }}
+
     - run: choco install -y visualstudio${{ matrix.visual-studio-version }}-workload-vctools 
+      if:  ${{ matrix.visual-studio-version == 2017 }}
+    
     - run: choco install -y pkgconfiglite
     - run: choco install -y patch
 
