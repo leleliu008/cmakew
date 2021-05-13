@@ -7,13 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os-version: [2017, 2019]
-
-    runs-on: windows-${{ matrix.os-version }}
+  test-windows-2019:
+    runs-on: windows-latest
 
     defaults:
       run:
@@ -32,6 +27,30 @@ jobs:
     - run: cd ../ctags & patch -p1 -i patch/main-options.c.patch
     - run: cd ../ctags & patch -p1 -i patch/main-main.c.patch
 
-    - run: cd ../ctags & build.bat ${{ matrix.os-version }}
+    - run: cd ../ctags & build.bat 2019
+
+    - run: cd ../ctags/output/bin & ctags --version
+
+  test-windows-2016:
+    runs-on: windows-2016
+
+    defaults:
+      run:
+        shell: cmd /C {0}
+
+    steps:
+    - run: choco install -y pkgconfiglite patch
+
+    - uses: actions/checkout@v2
+
+    - run: cd .. & git clone https://github.com/universal-ctags/ctags
+    
+    - run: xcopy /s /y . ..\ctags
+
+    - run: cd ../ctags & patch -p1 -i patch/main-general.h.patch
+    - run: cd ../ctags & patch -p1 -i patch/main-options.c.patch
+    - run: cd ../ctags & patch -p1 -i patch/main-main.c.patch
+
+    - run: cd ../ctags & build.bat 2017
 
     - run: cd ../ctags/output/bin & ctags --version
