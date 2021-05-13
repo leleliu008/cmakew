@@ -1,0 +1,20 @@
+diff --git a/docs/_ext/lexers.py b/docs/_ext/lexers.py
+index 4f414b7bf..76be7ac34 100644
+--- a/docs/_ext/lexers.py
++++ b/docs/_ext/lexers.py
+@@ -1,5 +1,13 @@
+ from ctags_optlib_highlighter import CtagsOtplibLexer
++import sphinx
+ 
+ def setup(app):
+-    app.add_lexer('ctags', CtagsOtplibLexer())
+-
++    v = sphinx.__version__.split('.')
++    if int(v[0]) > 3:
++        c = CtagsOtplibLexer
++    else:
++        if (int(v[1]) > 3):
++            c = CtagsOtplibLexer
++        else:
++            c = CtagsOtplibLexer()
++    app.add_lexer('ctags', c)
