@@ -8,29 +8,19 @@ on:
 
 jobs:
   test:
-    runs-on: windows-latest
-
     strategy:
       fail-fast: false
       matrix:
-        visual-studio-version: [2017, 2019]
+        os-version: [2017, 2019]
+
+    runs-on: windows-${{ matrix.os-version }}
 
     defaults:
       run:
         shell: cmd /C {0}
 
     steps:
-    # https://github.com/jberezanski/ChocolateyPackages/issues/97
-    - run: choco upgrade    visualstudio2019enterprise
-
-      #- run: choco install -y visualstudio${{ matrix.visual-studio-version }}buildtools
-      #if:  ${{ matrix.visual-studio-version == 2017 }}
-
-    - run: choco install -y visualstudio${{ matrix.visual-studio-version }}-workload-vctools 
-      if:  ${{ matrix.visual-studio-version == 2017 }}
-    
-    - run: choco install -y pkgconfiglite
-    - run: choco install -y patch
+    - run: choco install -y pkgconfiglite patch
 
     - uses: actions/checkout@v2
 
@@ -42,6 +32,6 @@ jobs:
     - run: cd ../ctags & patch -p1 -i patch/main-options.c.patch
     - run: cd ../ctags & patch -p1 -i patch/main-main.c.patch
 
-    - run: cd ../ctags & build.bat ${{ matrix.visual-studio-version }}
+    - run: cd ../ctags & build.bat ${{ matrix.os-version }}
 
     - run: cd ../ctags/output/bin & ctags --version
