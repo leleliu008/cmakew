@@ -967,6 +967,7 @@ get_pkg_add_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
+    pip3|pip) echo 'py3-pip' ;;
     libtool|libtoolize|glibtool|glibtoolize)
               echo "libtool" ;;
     autoreconf|autoconf)
@@ -995,6 +996,7 @@ get_pkgin_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
+    pip3|pip) echo 'py38-pip' ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1017,8 +1019,7 @@ get_pkg_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-      rst2man|rst2html)
-              echo "py37-docutils" ;;
+    pip3|pip) echo 'py38-pip' ;;
     libtool|libtoolize|glibtool|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
@@ -1345,8 +1346,8 @@ __get_available_package_manager_list() {
 # $2 package name
 __install_package_via_package_manager() {
     case $1 in
-        pip3)    run pip3 install -U "$2" ;;
-        pip)     run pip  install -U "$2" ;;
+        pip3)    run pip3 install --user -U "$2" ;;
+        pip)     run pip  install --user -U "$2" ;;
         pkg)     run $sudo pkg install -y "$2" ;;
         pkgin)   run $sudo pkgin -y install "$2" ;;
         pkg_add) run $sudo pkg_add "$2" ;;
