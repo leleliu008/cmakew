@@ -1989,6 +1989,14 @@ EOF
     unset MAP_REQUIRED_DEPENDENCIES
     MAP_REQUIRED_DEPENDENCIES='MAP_REQUIRED_DEPENDENCIES'
 
+    unset PREBUILD_BINARY_CACHED_DIR
+    unset PREBUILD_BINARY_UNPACK_DIR
+    PREBUILD_BINARY_CACHED_DIR="$HOME/.cmakew"
+    PREBUILD_BINARY_UNPACK_DIR="$PREBUILD_BINARY_CACHED_DIR/unpack"
+
+    # pip install --user <PKG>
+    export PATH=$HOME/.local/bin:$PATH
+
     unset RC_FILE
 
     unset ACTION
@@ -2019,6 +2027,13 @@ EOF
     regist_dependency required command sed:gsed
     regist_dependency required command grep
     regist_dependency required command find
+
+    if [ -d "$PREBUILD_BINARY_UNPACK_DIR" ] ; then
+        for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -type d -name bin)
+        do
+            export PATH="$item:$PATH"
+        done
+    fi
 
     if [ "$DEBUG" = 'true' ] ; then
         step "handle essential tools"
@@ -2074,16 +2089,6 @@ EOF
         regist_dependency required command cmake
     else
         regist_dependency required command cmake ge "$CMAKE_VERSION_MREQUIRED"
-    fi
-
-    PREBUILD_BINARY_CACHED_DIR="$HOME/.cmakew"
-    PREBUILD_BINARY_UNPACK_DIR="$PREBUILD_BINARY_CACHED_DIR/unpack"
-
-    if [ -d "$PREBUILD_BINARY_UNPACK_DIR" ] ; then
-        for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -type d -name bin)
-        do
-            export PATH="$item:$PATH"
-        done
     fi
 
     if command_exists "perform_${ACTION}_pre" ; then
