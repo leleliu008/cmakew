@@ -11,6 +11,7 @@ perform_config_pre() {
 perform_test_pre() {
     regist_dependency required command python3:python:python3.5:python3.6:python3.7:python3.8:python3.9 ge 3.5
     regist_dependency required command rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
+    regist_dependency required command diff
 }
 
 perform_docs_pre() {
