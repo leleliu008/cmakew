@@ -998,7 +998,8 @@ get_pkgin_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
-    pip3|pip) echo 'py38-pip' ;;
+    pip3|pip) echo 'py38-pip'  ;;
+    python3)  echo 'python38' ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
