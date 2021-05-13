@@ -1535,7 +1535,7 @@ __install_command() {
                 handle_dependency required command pip3:pip
 
                 unset __PIP_COMMAND__
-                __PIP_COMMAND__"=$(command -v pip3.8)"
+                __PIP_COMMAND__="$(command -v pip3.8)"
 
                 if [ -n "$__PIP_COMMAND__" ] ; then
                     $sudo ln -sf "$__PIP_COMMAND__" /usr/local/bin/pip3
