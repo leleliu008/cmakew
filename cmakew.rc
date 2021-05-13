@@ -27,7 +27,7 @@ perform_docs_pre() {
 
 perform_docs() {
     [ "$DEBUG" = 'true' ] && step 'perform cmakew docs'
-    MAKE=$(command -v gmake || command -v make")
+    MAKE=$(command -v gmake || command -v make)
     run $MAKE -C docs $@
 }
 
