@@ -17,7 +17,12 @@ perform_test_pre() {
 perform_docs_pre() {
     regist_dependency required command python3:python:python3.5:python3.6:python3.7:python3.8:python3.9 ge 3.5
     regist_dependency required command sphinx-build
-    regist_dependency required command make:gmake
+    
+    if [ "$NATIVE_OS_KIND" = 'freebsd' ] ; then
+        regist_dependency required command gmake
+    else
+        regist_dependency required command gmake:make
+    fi
 }
 
 perform_docs() {
