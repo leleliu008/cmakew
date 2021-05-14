@@ -1564,6 +1564,15 @@ __install_command_via_fetch_prebuild_binary() {
 # make
 __get_prebuild_binary_fetch_url_by_command_name() {
     case $1 in
+        python3|python)
+            case $NATIVE_OS_KIND in
+                linux)
+                    if [ "$NATIVE_OS_LIBC" = 'glibc' ] ; then
+                        # https://github.com/leleliu008/python-prebuild
+                        echo "https://github.com/leleliu008/python-prebuild/releases/download/3.9.5/python-3.9.5-linux-glibc.tar.xz"
+                    fi
+            esac
+            ;;
         cmake)
             case $NATIVE_OS_KIND in
                 linux)
