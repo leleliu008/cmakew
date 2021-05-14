@@ -851,7 +851,7 @@ version_sort() {
     # sort: unrecognized option: V
     # BusyBox v1.29.3 (2019-01-24 07:45:07 UTC) multi-call binary.
     # Usage: sort [-nrugMcszbdfiokt] [-o FILE] [-k start[.offset][opts][,end[.offset][opts]] [-t CHAR] [FILE]...
-    if  echo | (sort -V 2> /dev/null) ; then
+    if  echo | (sort -V > /dev/null 2>&1) ; then
         echo "$@" | tr ' ' '\n' | sort -V
     else
         echo "$@" | tr ' ' '\n' | sort -t. -n -k1,1 -k2,2 -k3,3 -k4,4
@@ -880,19 +880,19 @@ version_match() {
         ne)  [ "$1" != "$3" ] ;;
         le)
             [ "$1" = "$3" ] && return 0
-            [ "$1" = $(version_sort "$1" "$3" | head -n 1) ]
+            [ "$1" = "$(version_sort "$1" "$3" | head -n 1)" ]
             ;;
         ge)
             [ "$1" = "$3" ] && return 0
-            [ "$1" = $(version_sort "$1" "$3" | tail -n 1) ]
+            [ "$1" = "$(version_sort "$1" "$3" | tail -n 1)" ]
             ;;
         lt)
             [ "$1" = "$3" ] && return 1
-            [ "$1" = $(version_sort "$1" "$3" | head -n 1) ]
+            [ "$1" = "$(version_sort "$1" "$3" | head -n 1)" ]
             ;;
         gt)
             [ "$1" = "$3" ] && return 1
-            [ "$1" = $(version_sort "$1" "$3" | tail -n 1) ]
+            [ "$1" = "$(version_sort "$1" "$3" | tail -n 1)" ]
             ;;
         *)  die "version_compare: $2: not supported operator."
     esac
@@ -1868,9 +1868,13 @@ regist_dependency() {
 
 perform_config() {
     [ "$DEBUG" = 'true' ] && step 'perform cmakew config'
-    
+
     unset GENERATOR_SET
     unset BUILD_DIR_SET
+
+    unset CMAKE_EXPORT_COMPILE_COMMANDS
+    unset CMAKE_VERBOSE_MAKEFILE
+    unset CMAKE_COLOR_MAKEFILE
 
     unset BUILD_DIR
     unset BUILD_SYS
@@ -1881,6 +1885,15 @@ perform_config() {
     for item in $@
     do
         case $item in
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=*)
+              CMAKE_EXPORT_COMPILE_COMMANDS=$(getvalue "$item")
+              ;;
+            -DCMAKE_VERBOSE_MAKEFILE=*)
+              CMAKE_VERBOSE_MAKEFILE=$(getvalue "$item")
+              ;;
+            -DCMAKE_COLOR_MAKEFILE=*)
+              CMAKE_COLOR_MAKEFILE=$(getvalue "$item")
+              ;;
             -B) BUILD_DIR_SET=true ;;
             -G) GENERATOR_SET=true ;;
             *)  if [ "$BUILD_DIR_SET" = 'true' ] ; then
@@ -1894,29 +1907,22 @@ perform_config() {
         esac
     done
 
-    if [ -z "$BUILD_DIR" ] ; then
-        BUILD_DIR="$PROJECT_DIR/build.d"
-        if command_exists_in_filesystem_and_version_matched cmake ge 3.13.0 ; then
-            CMAKE_FLAGS="
-                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
-                -DCMAKE_VERBOSE_MAKEFILE=ON 
-                -DCMAKE_COLOR_MAKEFILE=ON 
-                -Wno-dev 
-                -S . 
-                -B build.d $@"
-        elif command_exists_in_filesystem_and_version_matched cmake lt 3.13.0 ; then
-            # https://stackoverflow.com/questions/11143062/getting-cmake-to-build-out-of-source-without-wrapping-scripts
-            CMAKE_FLAGS="
-                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
-                -DCMAKE_VERBOSE_MAKEFILE=ON 
-                -DCMAKE_COLOR_MAKEFILE=ON 
-                -Wno-dev 
-                -H. 
-                -Bbuild.d $@"
-        else
-            die "cmake not found."
-        fi
+    if [ -z "$CMAKE_EXPORT_COMPILE_COMMANDS" ] ; then
+        CMAKE_EXPORT_COMPILE_COMMANDS=ON
     fi
+
+    if [ -z "$CMAKE_VERBOSE_MAKEFILE" ] ; then
+        CMAKE_VERBOSE_MAKEFILE=ON
+    fi
+
+    if [ -z "$CMAKE_COLOR_MAKEFILE" ] ; then
+        CMAKE_COLOR_MAKEFILE=ON
+    fi
+
+    CMAKE_FLAGS="
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=$CMAKE_EXPORT_COMPILE_COMMANDS
+        -DCMAKE_VERBOSE_MAKEFILE=$CMAKE_VERBOSE_MAKEFILE
+        -DCMAKE_COLOR_MAKEFILE=$CMAKE_COLOR_MAKEFILE"
 
     if [ -z "$GENERATOR" ] ; then
         GENERATOR='Unix Makefiles'
@@ -1931,6 +1937,19 @@ perform_config() {
     elif [ "$GENERATOR" = 'Ninja' ] ; then
         BUILD_SYS=ninja
         handle_dependency required command ninja
+    fi
+
+    if [ -z "$BUILD_DIR" ] ; then
+        BUILD_DIR="$PROJECT_DIR/build.d"
+    fi
+
+    if command_exists_in_filesystem_and_version_matched cmake ge 3.13.0 ; then
+        CMAKE_FLAGS="$CMAKE_FLAGS -Wno-dev -S . -B build.d $@"
+    elif command_exists_in_filesystem_and_version_matched cmake lt 3.13.0 ; then
+        # https://stackoverflow.com/questions/11143062/getting-cmake-to-build-out-of-source-without-wrapping-scripts
+        CMAKE_FLAGS="$CMAKE_FLAGS -Wno-dev -H. -Bbuild.d $@"
+    else
+        die "cmake not found."
     fi
 
     if run cmake $CMAKE_FLAGS ; then
@@ -2185,7 +2204,7 @@ EOF
     PROJECT_NAME=$(grep 'project(.*).*' CMakeLists.txt | sed 's/project(\(.*\)).*/\1/'| cut -d' ' -f1)
     PROJECT_VERSION=$(grep 'set(PACKAGE_VERSION .*).*' CMakeLists.txt | sed 's/set(PACKAGE_VERSION \(.*\)).*/\1/')
     
-    CMAKE_VERSION_MREQUIRED=$(grep 'cmake_minimum_required(VERSION\s*\[.*\])\s*$' CMakeLists.txt | sed 's/cmake_minimum_required(VERSION\s*\(.*\))/\1/')
+    CMAKE_VERSION_MREQUIRED=$(grep 'cmake_minimum_required(VERSION ' CMakeLists.txt | sed 's/cmake_minimum_required(VERSION\s*\(.*\))/\1/')
     if [ -z "$CMAKE_VERSION_MREQUIRED" ] ; then
         CMAKE_VERSION_MREQUIRED=$(grep 'CMAKE_MINIMUM_REQUIRED(VERSION\s*\[.*\])\s*$' CMakeLists.txt | sed 's/CMAKE_MINIMUM_REQUIRED(VERSION\s*\(.*\))/\1/')
     fi
