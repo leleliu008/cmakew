@@ -373,10 +373,10 @@ die_if_map_key__is_not_specified() {
 # {{{ fetch
 
 __get_available_fetch_tool() {
-    for item in curl wget http lynx aria2c axel
+    for tool in curl wget http lynx aria2c axel
     do
-        if command_exists_in_filesystem "$item" ; then
-            echo "$item"
+        if command_exists_in_filesystem "$tool" ; then
+            echo "$tool"
             return 0
         fi
     done
@@ -981,8 +981,8 @@ package_exists_in_repo() {
 # version_of_package apt automake
 version_of_package() {
     case $1 in
-        apt) apt show "$2" 2> /dev/null | grep 'Version: ' | cut -d ' ' -f2 | cut -d- -f1 ;;
-        yum) yum info "$2" 2> /dev/null | grep 'Version     :' | cut -d : -f2 | sed 's/^[[:space:]]//' ;;
+        apt) apt show "$2" 2> /dev/null | grep 'Version: '     | head -n 1 | cut -d ' ' -f2 | cut -d- -f1 ;;
+        yum) yum info "$2" 2> /dev/null | grep 'Version     :' | head -n 1 | cut -d : -f2 | sed 's/^[[:space:]]//' ;;
     esac
 }
 
@@ -1370,9 +1370,9 @@ __add_available_package_manager() {
 
 __get_available_package_manager_list() {
     if [ -z "$AVAILABLE_PACKAGE_MANAGER_LIST" ] ; then
-        for item in brew apt dnf zypper apk xbps-install emerge pacman choco pkg pkgin pkg_add
+        for pm in brew apt dnf zypper apk xbps-install emerge pacman choco pkg pkgin pkg_add
         do
-            case $item in
+            case $pm in
                 apt)
                     if command_exists_in_filesystem apt && apt show apt > /dev/null 2>&1 ; then
                         __add_available_package_manager apt apt
@@ -1390,7 +1390,7 @@ __get_available_package_manager_list() {
                 xbps-install)
                     __add_available_package_manager xbps-install xbps
                     ;;
-                *)  __add_available_package_manager "$item" "$item"
+                *)  __add_available_package_manager "$pm" "$pm"
             esac
         done
     fi
@@ -1474,9 +1474,9 @@ __install_command_via_available_package_manager() {
             echo "    Found $(list_length $AVAILABLE_PACKAGE_MANAGER_LIST) package manager : ${COLOR_GREEN}$AVAILABLE_PACKAGE_MANAGER_LIST${COLOR_OFF}"
         fi
     fi
-    for item in $AVAILABLE_PACKAGE_MANAGER_LIST
+    for pm in $AVAILABLE_PACKAGE_MANAGER_LIST
     do
-        __install_command_via_package_manager "$item" $@ && return 0
+        __install_command_via_package_manager "$pm" $@ && return 0
     done
     return 1
 }
@@ -1633,17 +1633,17 @@ handle_dependency() {
             shift
             case $1 in
                 *:*)
-                    for item in $(echo "$1" | tr ':' ' ')
+                    for command in $(echo "$1" | tr ':' ' ')
                     do
-                        if command_exists_in_filesystem_and_version_matched "$item" $2 $3 ; then
-                            map_set "$MAP_REQUIRED_DEPENDENCIES" "$1" "$item"
+                        if command_exists_in_filesystem_and_version_matched "$command" $2 $3 ; then
+                            map_set "$MAP_REQUIRED_DEPENDENCIES" "$1" "$command"
                             return 0
                         fi
                     done
-                    for item in $(echo "$1" | tr ':' ' ')
+                    for command in $(echo "$1" | tr ':' ' ')
                     do
-                        if __install_command "$item" $2 $3 ; then
-                            map_set "$MAP_REQUIRED_DEPENDENCIES" "$1" "$item"
+                        if __install_command "$command" $2 $3 ; then
+                            map_set "$MAP_REQUIRED_DEPENDENCIES" "$1" "$command"
                             return 0
                         fi
                     done
@@ -1692,9 +1692,9 @@ perl_module_installed() {
 __handle_required_dependencies() {
     [ "$DEBUG" = 'true' ] && step "handle required dependencies"
 
-    for item in $REQUIRED_DEPENDENCY_LIST
+    for dependency in $REQUIRED_DEPENDENCY_LIST
     do
-        handle_dependency $(__decode_dependency "$item") || return 1
+        handle_dependency $(__decode_dependency "$dependency") || return 1
     done
 }
 
@@ -1756,9 +1756,9 @@ __printf_required_dependencies() {
         warn "no required dependencies."
     else
         __printf_dependency TYPE NAME OP EXPECT ACTUAL LOCATION
-        for item in $REQUIRED_DEPENDENCY_LIST
+        for dependency in $REQUIRED_DEPENDENCY_LIST
         do
-            printf_dependency $(__decode_dependency "$item")
+            printf_dependency $(__decode_dependency "$dependency")
         done
     fi
 }
@@ -1769,9 +1769,9 @@ __printf_optional_dependencies() {
         warn "no optional dependencies."
     else
         __printf_dependency TYPE NAME OP EXPECT ACTUAL LOCATION
-        for item in $OPTIONAL_DEPENDENCY_LIST
+        for dependency in $OPTIONAL_DEPENDENCY_LIST
         do
-            printf_dependency $(__decode_dependency "$item")
+            printf_dependency $(__decode_dependency "$dependency")
         done
     fi
 }
@@ -1840,26 +1840,21 @@ __decode_dependency() {
 # regist_dependency optional command python     ge 3.5
 # regist_dependency optional python  libxml2    ge 2.19
 regist_dependency() {
-    for item in $@
-    do
-        case $item in
-            required)
-                if [ -z "$REQUIRED_DEPENDENCY_LIST" ] ; then
-                    REQUIRED_DEPENDENCY_LIST="$(__encode_dependency "$*")"
-                else
-                    REQUIRED_DEPENDENCY_LIST="$REQUIRED_DEPENDENCY_LIST $(__encode_dependency "$*")"
-                fi
-                break
-                ;;
-            optional)
-                if [ -z "$OPTIONAL_DEPENDENCY_LIST" ] ; then
-                    OPTIONAL_DEPENDENCY_LIST=$(__encode_dependency "$*")
-                else
-                    OPTIONAL_DEPENDENCY_LIST="$OPTIONAL_DEPENDENCY_LIST $(__encode_dependency "$*")"
-                fi
-                break
-        esac
-    done
+    case $1 in
+        required)
+            if [ -z "$REQUIRED_DEPENDENCY_LIST" ] ; then
+                REQUIRED_DEPENDENCY_LIST="$(__encode_dependency "$*")"
+            else
+                REQUIRED_DEPENDENCY_LIST="$REQUIRED_DEPENDENCY_LIST $(__encode_dependency "$*")"
+            fi
+            ;;
+        optional)
+            if [ -z "$OPTIONAL_DEPENDENCY_LIST" ] ; then
+                OPTIONAL_DEPENDENCY_LIST=$(__encode_dependency "$*")
+            else
+                OPTIONAL_DEPENDENCY_LIST="$OPTIONAL_DEPENDENCY_LIST $(__encode_dependency "$*")"
+            fi
+    esac
 }
 
 # }}}
@@ -2161,9 +2156,9 @@ EOF
     if [ "$DEBUG" = 'true' ] ; then
         step "handle essential tools"
     fi
-    for item in $REQUIRED_DEPENDENCY_LIST
+    for dependency in $REQUIRED_DEPENDENCY_LIST
     do
-        handle_dependency $(__decode_dependency "$item") || return 1
+        handle_dependency $(__decode_dependency "$dependency") || return 1
     done
 
     [ -z "$RC_FILE" ] && RC_FILE='./cmakew.rc'
