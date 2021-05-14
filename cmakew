@@ -1099,6 +1099,7 @@ get_emerge_package_name_by_command_name() {
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
+      xz)     echo 'xz-utils' ;;
       rst2man|rst2html)
               echo "docutils" ;;
     sphinx-build)
@@ -1304,6 +1305,7 @@ get_apt_package_name_by_command_name() {
         gsed) echo 'gnu-sed'  ;;
         find) echo 'findutils';;
         diff) echo 'diffutils';;
+        xz)   echo 'xz-utils' ;;
      objcopy) echo 'binutils' ;;
       protoc) echo 'protobuf' ;;
       ps2pdf) echo "ghostscript" ;;
