@@ -46,9 +46,9 @@ file_exists() {
     [ -n "$1" ] && [ -e "$1" ]
 }
 
-# check if command exists
+# check if command exists in filesystem
 # $1 command name or path
-command_exists() {
+command_exists_in_filesystem() {
     case $1 in
         */*) executable "$1" ;;
         *)   command -v "$1" > /dev/null
@@ -375,7 +375,7 @@ die_if_map_key__is_not_specified() {
 __get_available_fetch_tool() {
     for item in curl wget http lynx aria2c axel
     do
-        if command_exists "$item" ; then
+        if command_exists_in_filesystem "$item" ; then
             echo "$item"
             return 0
         fi
@@ -412,7 +412,7 @@ __fetch_archive_via_tools() {
 
     if [ -z "$AVAILABLE_FETCH_TOOL" ] ; then
         handle_dependency required command curl || return 1
-        if command_exists curl ; then
+        if command_exists_in_filesystem curl ; then
             AVAILABLE_FETCH_TOOL=curl
         else
             return 1
@@ -909,14 +909,14 @@ version_match() {
 # le  less than or equal
 #
 # examples:
-# command_exists_and_version_matched automake eq 1.16.0
-# command_exists_and_version_matched automake lt 1.16.0
-# command_exists_and_version_matched automake gt 1.16.0
-# command_exists_and_version_matched automake le 1.16.0
-# command_exists_and_version_matched automake ge 1.16.0
-# command_exists_and_version_matched automake
-command_exists_and_version_matched() {
-    if command_exists "$1" ; then
+# command_exists_in_filesystem_and_version_matched automake eq 1.16.0
+# command_exists_in_filesystem_and_version_matched automake lt 1.16.0
+# command_exists_in_filesystem_and_version_matched automake gt 1.16.0
+# command_exists_in_filesystem_and_version_matched automake le 1.16.0
+# command_exists_in_filesystem_and_version_matched automake ge 1.16.0
+# command_exists_in_filesystem_and_version_matched automake
+command_exists_in_filesystem_and_version_matched() {
+    if command_exists_in_filesystem "$1" ; then
         if [ "$NATIVE_OS_TYPE" = 'cygwin' ] ; then
             case $(command -v "$1") in
                 /cygdrive/*) return 1
@@ -929,6 +929,90 @@ command_exists_and_version_matched() {
         return 1
     fi
 }
+
+# }}}
+##############################################################################
+# {{{ package_manager
+
+# check if the version of give package match the condition
+#
+# condition:
+# eq  equal
+# ne  not equal
+# gt  greater than
+# lt  less than
+# ge  greater than or equal
+# le  less than or equal
+#
+# examples:
+# package_exists_and_version_matched apt automake eq 1.16.0
+# package_exists_and_version_matched apt automake lt 1.16.0
+# package_exists_and_version_matched apt automake gt 1.16.0
+# package_exists_and_version_matched apt automake le 1.16.0
+# package_exists_and_version_matched apt automake ge 1.16.0
+# package_exists_and_version_matched apt automake
+package_exists_in_repo_and_version_matched() {
+    if package_exists_in_repo "$1" ; then
+        if [ $# -eq 4 ] ; then
+            case $1 in
+                apt|yum) version_match "$(version_of_package "$1" "$2")" "$3" "$4" ;;
+                *)       return 0 ;;
+            esac
+        fi
+    else
+        return 1
+    fi
+}
+
+# check if the give package is in the give repo
+#
+# examples:
+# package_exists_in_repo apt automake
+package_exists_in_repo() {
+    case $1 in
+        apt) apt show "$2" > /dev/null 2>&1 ;;
+        yum) yum info "$2" > /dev/null 2>&1 ;;
+    esac
+}
+
+# get the version of the give package in the give repo
+#
+# examples:
+# version_of_package apt automake
+version_of_package() {
+    case $1 in
+        apt) apt show "$2" 2> /dev/null | grep 'Version: ' | cut -d ' ' -f2 | cut -d- -f1 ;;
+        yum) yum info "$2" 2> /dev/null | grep 'Version     :' | cut -d : -f2 | sed 's/^[[:space:]]//' ;;
+    esac
+}
+
+# check if the version of give package match the condition
+#
+# condition:
+# eq  equal
+# ne  not equal
+# gt  greater than
+# lt  less than
+# ge  greater than or equal
+# le  less than or equal
+#
+# examples:
+# package_exists_and_version_matched apt automake eq 1.16.0
+# package_exists_and_version_matched apt automake lt 1.16.0
+# package_exists_and_version_matched apt automake gt 1.16.0
+# package_exists_and_version_matched apt automake le 1.16.0
+# package_exists_and_version_matched apt automake ge 1.16.0
+# package_exists_and_version_matched apt automake
+package_exists_in_repo_and_version_matched() {
+    if package_exists_in_repo "$1" ; then
+        if [ $# -eq 4 ] ; then
+            package_version_match "$2" "$3" "$4"
+        fi
+    else
+        return 1
+    fi
+}
+
 
 # }}}
 ##############################################################################
@@ -1303,7 +1387,7 @@ get_pip_package_name_by_command_name() {
 # {{{ __get_available_package_manager_list
 
 __add_available_package_manager() {
-    if command_exists "$1" ; then
+    if command_exists_in_filesystem "$1" ; then
         if [ -z "$AVAILABLE_PACKAGE_MANAGER_LIST" ] ; then
             AVAILABLE_PACKAGE_MANAGER_LIST="$2"
         else
@@ -1318,14 +1402,14 @@ __get_available_package_manager_list() {
         do
             case $item in
                 apt)
-                    if command_exists apt && apt show apt > /dev/null 2>&1 ; then
+                    if command_exists_in_filesystem apt && apt show apt > /dev/null 2>&1 ; then
                         __add_available_package_manager apt apt
                     else
                         __add_available_package_manager apt-get apt-get
                     fi
                     ;;
                 dnf)
-                    if command_exists dnf ; then
+                    if command_exists_in_filesystem dnf ; then
                         __add_available_package_manager dnf dnf
                     else
                         __add_available_package_manager yum yum
@@ -1347,7 +1431,16 @@ __get_available_package_manager_list() {
 
 # $1 package manager name
 # $2 package name
+# examples:
+# __install_package_via_package_manager apt make ge 3.80
+# __install_package_via_package_manager apt make
 __install_package_via_package_manager() {
+    [ -z "$2" ] && return 1
+
+    package_exists_in_repo_and_version_matched $@ || return 1
+
+    print "🔥  ${COLOR_YELLOW}required command${COLOR_OFF} ${COLOR_GREEN}$(shiftn 1 $@)${COLOR_OFF}${COLOR_YELLOW}, but${COLOR_OFF} ${COLOR_GREEN}$2${COLOR_OFF} ${COLOR_YELLOW}command not found, try to install it via${COLOR_OFF} ${COLOR_GREEN}$1${COLOR_OFF}\n"
+
     case $1 in
         pip3) case $NATIVE_OS_KIND in
                 *bsd|linux) run pip3 install --user -U "$2" ;;
@@ -1381,23 +1474,16 @@ __install_package_via_package_manager() {
         pacman)  run $sudo pacman -Syy --noconfirm && run $sudo pacman -S --noconfirm "$2" ;;
         choco)   run choco install -y --source cygwin "$2" ;;
     esac
+    echo
 }
 
 # $1 package manager name
 # $2 command name
+# examples:
+# __install_command_via_package_manager apt make ge 3.80
+# __install_command_via_package_manager apt make
 __install_command_via_package_manager() {
-    PACKAGE_NAME="$(eval get_$(echo "$1" | tr - _)_package_name_by_command_name $2)"
-    if [ -z "$PACKAGE_NAME" ] ; then
-        warn "can not found a package in $1 repo, which contains the $2 command."
-        return 1
-    else
-        print "🔥  ${COLOR_YELLOW}required command${COLOR_OFF} ${COLOR_GREEN}$(shiftn 1 $@)${COLOR_OFF}${COLOR_YELLOW}, but${COLOR_OFF} ${COLOR_GREEN}$2${COLOR_OFF} ${COLOR_YELLOW}command not found, try to install it via${COLOR_OFF} ${COLOR_GREEN}$1${COLOR_OFF}\n"
-        if __install_package_via_package_manager "$1" "$PACKAGE_NAME" ; then
-            echo
-        else
-            return 1
-        fi
-    fi
+    __install_package_via_package_manager "$1" "$(eval get_$(echo "$1" | tr - _)_package_name_by_command_name $2)" $(shiftn 2 $@)
 }
 
 # examples:
@@ -1405,86 +1491,92 @@ __install_command_via_package_manager() {
 # python3    ge 3.5
 # make
 __install_command_via_available_package_manager() {
-    if command_exists_and_version_matched $@ ; then
-        return 0
-    else
+    command_exists_in_filesystem_and_version_matched $@ && return 0
+ 
+    if [ -z "$AVAILABLE_PACKAGE_MANAGER_LIST" ] ; then
+        AVAILABLE_PACKAGE_MANAGER_LIST=$(__get_available_package_manager_list)
         if [ -z "$AVAILABLE_PACKAGE_MANAGER_LIST" ] ; then
-            AVAILABLE_PACKAGE_MANAGER_LIST=$(__get_available_package_manager_list)
-            if [ -z "$AVAILABLE_PACKAGE_MANAGER_LIST" ] ; then
-                warn "no package manager found."
-                return 1
-            else
-                echo "    Found $(list_length $AVAILABLE_PACKAGE_MANAGER_LIST) package manager : ${COLOR_GREEN}$AVAILABLE_PACKAGE_MANAGER_LIST${COLOR_OFF}"
-            fi
+            warn "no package manager found."
+            return 1
+        else
+            echo "    Found $(list_length $AVAILABLE_PACKAGE_MANAGER_LIST) package manager : ${COLOR_GREEN}$AVAILABLE_PACKAGE_MANAGER_LIST${COLOR_OFF}"
         fi
-        for pm in $AVAILABLE_PACKAGE_MANAGER_LIST
-        do
-            __install_command_via_package_manager "$pm" $@ && return 0
-        done
     fi
+    for item in $AVAILABLE_PACKAGE_MANAGER_LIST
+    do
+        __install_command_via_package_manager "$item" $@ && return 0
+    done
+    return 1
 }
 
 # examples:
-# URL pkg-config ge 0.18
-# URL python3    ge 3.5
-# URL make
+# pkg-config ge 0.18
+# python3    ge 3.5
+# make
 __install_command_via_fetch_prebuild_binary() {
-    print "🔥  ${COLOR_YELLOW}required command${COLOR_OFF} ${COLOR_GREEN}$(shiftn 1 $@)${COLOR_OFF}${COLOR_YELLOW}, but${COLOR_OFF} ${COLOR_GREEN}$2${COLOR_OFF} ${COLOR_YELLOW}command not found, try to install it via${COLOR_OFF} ${COLOR_GREEN}fetch prebuild binary${COLOR_OFF}\n"
+    unset PREBUILD_BINARY_FETCH_URL
+    PREBUILD_BINARY_FETCH_URL=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
+    if [ -z "$PREBUILD_BINARY_FETCH_URL" ] ; then
+        warn "no fetch url for $@"
+        return 1
+    fi
+
+    print "🔥  ${COLOR_YELLOW}required command${COLOR_OFF} ${COLOR_GREEN}$@${COLOR_OFF}${COLOR_YELLOW}, but${COLOR_OFF} ${COLOR_GREEN}$1${COLOR_OFF} ${COLOR_YELLOW}command not found, try to install it via${COLOR_OFF} ${COLOR_GREEN}fetch prebuild binary${COLOR_OFF}\n"
 
     unset PREBUILD_BINARY_FILENAME
     unset PREBUILD_BINARY_FILEPATH
 
-    PREBUILD_BINARY_FILENAME=$(basename "$1")
+    PREBUILD_BINARY_FILENAME=$(basename "$PREBUILD_BINARY_FETCH_URL")
     PREBUILD_BINARY_FILEPATH="$PREBUILD_BINARY_CACHED_DIR/$PREBUILD_BINARY_FILENAME"
 
-    if [ -d    "$PREBUILD_BINARY_UNPACK_DIR/$2" ] ; then
-        rm -rf "$PREBUILD_BINARY_UNPACK_DIR/$2" || return 1
+    if [ -d    "$PREBUILD_BINARY_UNPACK_DIR/$1" ] ; then
+        rm -rf "$PREBUILD_BINARY_UNPACK_DIR/$1" || return 1
     fi
 
     if [ ! -f "$PREBUILD_BINARY_FILEPATH" ] ; then
-        run fetch "$1" --output-dir="$PREBUILD_BINARY_CACHED_DIR" --output-name="$PREBUILD_BINARY_FILENAME" || return 1
+        run fetch "$PREBUILD_BINARY_FETCH_URL" --output-dir="$PREBUILD_BINARY_CACHED_DIR" --output-name="$PREBUILD_BINARY_FILENAME" || return 1
     fi
 
-    run install -d "$PREBUILD_BINARY_UNPACK_DIR/$2" || return 1
+    run install -d "$PREBUILD_BINARY_UNPACK_DIR/$1" || return 1
 
-    case $1 in
+    case $PREBUILD_BINARY_FETCH_URL in
         *.zip)
             handle_dependency required command unzip &&
-            run unzip "$PREBUILD_BINARY_FILEPATH" -d "$PREBUILD_BINARY_UNPACK_DIR/$2"
+            run unzip "$PREBUILD_BINARY_FILEPATH" -d "$PREBUILD_BINARY_UNPACK_DIR/$1"
             ;;
         *.tar.xz)
             handle_dependency required command tar  &&
             handle_dependency required command xz   &&
-            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$1" --strip-components 1
             ;;
         *.tar.gz)
             handle_dependency required command tar  &&
             handle_dependency required command gzip &&
-            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$1" --strip-components 1
             ;;
         *.tar.lz)
             handle_dependency required command tar  &&
             handle_dependency required command lzip &&
-            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$1" --strip-components 1
             ;;
         *.tar.bz2)
             handle_dependency required command tar   &&
             handle_dependency required command bzip2 &&
-            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$1" --strip-components 1
             ;;
         *.tgz)
             handle_dependency required command tar  &&
             handle_dependency required command gzip &&
-            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$1" --strip-components 1
             ;;
         *.txz)
             handle_dependency required command tar &&
             handle_dependency required command xz  &&
-            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$2" --strip-components 1
+            run tar xf "$PREBUILD_BINARY_FILEPATH" -C "$PREBUILD_BINARY_UNPACK_DIR/$1" --strip-components 1
     esac
 
-    if [ -d "$PREBUILD_BINARY_UNPACK_DIR/$2/bin" ] ; then
-        export PATH="$PREBUILD_BINARY_UNPACK_DIR/$2/bin:$PATH"
+    if [ -d "$PREBUILD_BINARY_UNPACK_DIR/$1/bin" ] ; then
+        export PATH="$PREBUILD_BINARY_UNPACK_DIR/$1/bin:$PATH"
     fi
     if [ "$NATIVE_OS_KIND" = 'darwin' ] ; then
         for item in $(find "$PREBUILD_BINARY_UNPACK_DIR" -type d -name bin)
@@ -1509,11 +1601,34 @@ __get_prebuild_binary_fetch_url_by_command_name() {
                     fi
                     ;;
                 darwin)
-                    if ! command_exists brew ; then
+                    if ! command_exists_in_filesystem brew ; then
                         echo "https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2-macos-universal.tar.gz"
                     fi
             esac
     esac
+}
+
+__install_command_via_pip() {
+    [ -z "$(get_pip3_package_name_by_command_name "$1")" ] && return 1
+
+    handle_dependency required command pip3:pip
+
+    (
+        unset __PIP_COMMAND__
+        __PIP_COMMAND__="$(command -v pip3.8)"
+
+        if [ -n "$__PIP_COMMAND__" ] && [ -d '/usr/local/bin' ] ; then
+            $sudo ln -sf "$__PIP_COMMAND__" /usr/local/bin/pip3
+        fi
+    )
+
+    if   command_exists_in_filesystem pip3 ; then
+        __install_package_via_package_manager pip3 "$(get_pip3_package_name_by_command_name "$1")"
+    elif command_exists_in_filesystem pip ; then
+        __install_package_via_package_manager pip  "$(get_pip3_package_name_by_command_name "$1")"
+    else
+        return 1
+    fi
 }
 
 # examples:
@@ -1521,36 +1636,11 @@ __get_prebuild_binary_fetch_url_by_command_name() {
 # python3    ge 3.5
 # make
 __install_command() {
-    if command_exists_and_version_matched $@ ; then
-        return 0
-    else
-        unset __PREBUILD_BINARY_FETCH_URL__
-        __PREBUILD_BINARY_FETCH_URL__=$(__get_prebuild_binary_fetch_url_by_command_name "$1")
-        if [ -z "$__PREBUILD_BINARY_FETCH_URL__" ] ; then
-            if [ -z "$(get_pip3_package_name_by_command_name "$1")" ] ; then
-                __install_command_via_available_package_manager $@
-            else
-                handle_dependency required command pip3:pip
+    command_exists_in_filesystem_and_version_matched $@ && return 0
 
-                unset __PIP_COMMAND__
-                __PIP_COMMAND__="$(command -v pip3.8)"
-
-                if [ -n "$__PIP_COMMAND__" ] ; then
-                    $sudo ln -sf "$__PIP_COMMAND__" /usr/local/bin/pip3
-                fi
-
-                if   command_exists pip3 ; then
-                    __install_package_via_package_manager pip3 "$(get_pip3_package_name_by_command_name "$1")"
-                elif command_exists pip ; then
-                    __install_package_via_package_manager pip  "$(get_pip3_package_name_by_command_name "$1")"
-                else
-                    die "please install pip3."
-                fi
-            fi
-        else
-            __install_command_via_fetch_prebuild_binary "$__PREBUILD_BINARY_FETCH_URL__" $@
-        fi
-    fi
+    __install_command_via_pip $@ && return 0
+    __install_command_via_available_package_manager $@ && return 0
+    __install_command_via_fetch_prebuild_binary $@
 }
 
 # examples:
@@ -1562,9 +1652,7 @@ __install_command() {
 # handle_dependency optional command python     ge 3.5
 # handle_dependency optional python  libxml2    ge 2.19
 handle_dependency() {
-    if [ "$1" != 'required' ] ; then
-        return 0
-    fi
+    [ "$1" = 'required' ] || return 0
 
     shift
 
@@ -1575,7 +1663,7 @@ handle_dependency() {
                 *:*)
                     for item in $(echo "$1" | tr ':' ' ')
                     do
-                        if command_exists_and_version_matched "$item" $2 $3 ; then
+                        if command_exists_in_filesystem_and_version_matched "$item" $2 $3 ; then
                             map_set "$MAP_REQUIRED_DEPENDENCIES" "$1" "$item"
                             return 0
                         fi
@@ -1593,15 +1681,15 @@ handle_dependency() {
             ;;
         python|python3)
             shift
-            if command_exists python3 ; then
+            if command_exists_in_filesystem python3 ; then
                 if ! python3 -c "import $1" 2> /dev/null ; then
-                    if command_exists pip3 ; then
+                    if command_exists_in_filesystem pip3 ; then
                         pip3 install -U "$1" || return 1
                     fi
                 fi
-            elif command_exists python ; then
+            elif command_exists_in_filesystem python ; then
                 if ! python -c "import $1" 2> /dev/null ; then
-                    if command_exists pip ; then
+                    if command_exists_in_filesystem pip ; then
                         pip install -U "$1" || return 1
                     fi
                 fi
@@ -1609,12 +1697,24 @@ handle_dependency() {
             ;;
         perl)
             shift
-            if ! perl -M"$1" -le 'print "installed"' > /dev/null 2>&1 ; then
-                cpan -i "$1" || return 1
+            if ! command_exists_in_filesystem perl ; then
+                 handle_dependency required command perl
+            fi
+            if ! perl_module_installed "$1" ; then
+                if  command_exists_in_filesystem cpan ; then
+                    cpan -i "$1" || return 1
+                fi
             fi
             ;;
         *) die "$1 not support."
     esac
+}
+
+# check if the given perl module is installed
+# examples:
+# perl_module_installed lixml2
+perl_module_installed() {
+    perl -M"$1" -le 'print "installed"' > /dev/null 2>&1
 }
 
 __handle_required_dependencies() {
@@ -1886,7 +1986,7 @@ perform_install() {
         fi
         [ "$DEBUG" = 'true' ] && step 'perform cmakew install'
         # https://stackoverflow.com/questions/34040522/is-there-a-cmake-install-switch/34040747
-        if command_exists_and_version_matched cmake ge 3.15.0 ; then
+        if command_exists_in_filesystem_and_version_matched cmake ge 3.15.0 ; then
             run cmake --install "$BUILD_DIR"
         else
             run "$BUILD_SYS" -C "$BUILD_DIR" install
@@ -2079,7 +2179,7 @@ EOF
         warn "$RC_FILE not exist. skipped."
     fi
 
-    command_exists "perform_$ACTION" || die "$ACTION: don't recognized action."
+    command_exists_in_filesystem "perform_$ACTION" || die "$ACTION: don't recognized action."
 
     NATIVE_OS_KIND=$(os kind)
     NATIVE_OS_TYPE=$(os type)
@@ -2110,7 +2210,7 @@ EOF
         regist_dependency required command cmake ge "$CMAKE_VERSION_MREQUIRED"
     fi
 
-    if command_exists "perform_${ACTION}_pre" ; then
+    if command_exists_in_filesystem "perform_${ACTION}_pre" ; then
         eval "perform_${ACTION}_pre $ACTION_ARGS" || return 1
     fi
 
@@ -2147,7 +2247,7 @@ EOF
 
     eval "perform_$ACTION $ACTION_ARGS" || return 1
 
-    if command_exists "perform_${ACTION}_post" ; then
+    if command_exists_in_filesystem "perform_${ACTION}_post" ; then
         eval "perform_${ACTION}_post $ACTION_ARGS" || return 1
     fi
 }
