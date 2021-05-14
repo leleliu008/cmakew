@@ -986,34 +986,6 @@ version_of_package() {
     esac
 }
 
-# check if the version of give package match the condition
-#
-# condition:
-# eq  equal
-# ne  not equal
-# gt  greater than
-# lt  less than
-# ge  greater than or equal
-# le  less than or equal
-#
-# examples:
-# package_exists_and_version_matched apt automake eq 1.16.0
-# package_exists_and_version_matched apt automake lt 1.16.0
-# package_exists_and_version_matched apt automake gt 1.16.0
-# package_exists_and_version_matched apt automake le 1.16.0
-# package_exists_and_version_matched apt automake ge 1.16.0
-# package_exists_and_version_matched apt automake
-package_exists_in_repo_and_version_matched() {
-    if package_exists_in_repo "$1" ; then
-        if [ $# -eq 4 ] ; then
-            package_version_match "$2" "$3" "$4"
-        fi
-    else
-        return 1
-    fi
-}
-
-
 # }}}
 ##############################################################################
 # {{{ get_XX_package_name_by_command_name
