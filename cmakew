@@ -952,7 +952,7 @@ command_exists_in_filesystem_and_version_matched() {
 # package_exists_and_version_matched apt automake ge 1.16.0
 # package_exists_and_version_matched apt automake
 package_exists_in_repo_and_version_matched() {
-    if package_exists_in_repo "$1" ; then
+    if package_exists_in_repo "$1" "$2" ; then
         if [ $# -eq 4 ] ; then
             case $1 in
                 apt|yum) version_match "$(version_of_package "$1" "$2")" "$3" "$4" ;;
