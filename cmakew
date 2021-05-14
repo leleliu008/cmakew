@@ -1896,13 +1896,26 @@ perform_config() {
 
     if [ -z "$BUILD_DIR" ] ; then
         BUILD_DIR="$PROJECT_DIR/build.d"
-        CMAKE_FLAGS="
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
-            -DCMAKE_VERBOSE_MAKEFILE=ON 
-            -DCMAKE_COLOR_MAKEFILE=ON 
-            -Wno-dev 
-            -S . 
-            -B build.d $@"
+        if command_exists_in_filesystem_and_version_matched cmake ge 3.13.0 ; then
+            CMAKE_FLAGS="
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
+                -DCMAKE_VERBOSE_MAKEFILE=ON 
+                -DCMAKE_COLOR_MAKEFILE=ON 
+                -Wno-dev 
+                -S . 
+                -B build.d $@"
+        elif command_exists_in_filesystem_and_version_matched cmake lt 3.13.0 ; then
+            # https://stackoverflow.com/questions/11143062/getting-cmake-to-build-out-of-source-without-wrapping-scripts
+            CMAKE_FLAGS="
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
+                -DCMAKE_VERBOSE_MAKEFILE=ON 
+                -DCMAKE_COLOR_MAKEFILE=ON 
+                -Wno-dev 
+                -H. 
+                -Bbuild.d $@"
+        else
+            die "cmake not found."
+        fi
     fi
 
     if [ -z "$GENERATOR" ] ; then
