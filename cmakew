@@ -1117,12 +1117,7 @@ get_emerge_package_name_by_command_name() {
 
 __get_pacman_package_name_by_command_name() {
     case $1 in
-          cc|gcc)
-            case $NATIVE_OS_TYPE in
-                mingw32|mingw64) echo 'toolchain' ;;
-                *)               echo 'gcc'
-            esac
-            ;;
+          cc) echo 'gcc'      ;;
          gm4) echo 'm4'       ;;
         gsed) echo 'gnu-sed'  ;;
         find) echo 'findutils';;
