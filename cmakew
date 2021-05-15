@@ -2064,11 +2064,16 @@ perform_test() {
     unset CTEST_FLAGS
     unset CTEST_DIR
     unset BUILD_DIR
+    unset OUTPUT_ON_FAILURE
 
     for item in $@
     do
         case $item in
-            --test-dir) CTEST_DIR=$(getvalue "$item")
+            --test-dir)
+                CTEST_DIR=$(getvalue "$item")
+                ;;
+            --output-on-failure)
+                OUTPUT_ON_FAILURE='true'
         esac
     done
 
@@ -2079,10 +2084,16 @@ perform_test() {
             die "haven't built. please run ./cmakew build."
         fi
 
-        if [ -z "$CTEST_DIR" ] ; then
-            CTEST_FLAGS="--test-dir $BUILD_DIR $@"
+        if [ "$OUTPUT_ON_FAILURE" = 'true' ] ; then
+            unset OUTPUT_ON_FAILURE
         else
-            CTEST_FLAGS="$@"
+            OUTPUT_ON_FAILURE='--output-on-failure'
+        fi
+
+        if [ -z "$CTEST_DIR" ] ; then
+            CTEST_FLAGS="--test-dir $BUILD_DIR $@ $OUTPUT_ON_FAILURE"
+        else
+            CTEST_FLAGS="$@ $OUTPUT_ON_FAILURE"
         fi
 
         run ctest $CTEST_FLAGS || return 1
