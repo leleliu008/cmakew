@@ -33,10 +33,7 @@ jobs:
           run cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
           run cd ctags
 
-          for item in patch/*.patch
-          do
-            patch -p1 < "$item" || return 1
-          done
+          cat patch/*.patch | patch -p1
 
           run ./cmakew config -d -DCMAKE_BUILD_TYPE=Release
           run ./cmakew install -d
