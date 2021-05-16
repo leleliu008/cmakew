@@ -51,7 +51,7 @@ jobs:
           sed -i 's|http:|https:|g'             /etc/yum.repos.d/CentOS-Base.repo
 
       - run: yum -y update
-      - run: yum -y install patch file gcc make curl xz
+      - run: yum -y install patch file curl xz
 
       - run: |
           curl -LO https://github.com/leleliu008/git-prebuild/releases/download/2.30.2/git-2.30.2-x86_64-linux-glibc.tar.xz
