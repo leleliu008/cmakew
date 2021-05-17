@@ -18,8 +18,8 @@ jobs:
     container: fedora:${{ matrix.tag }}
 
     steps:
-      - run: dnf --nogpgcheck -y update
-      - run: dnf --nogpgcheck -y install git patch file
+      - run: dnf -y update
+      - run: dnf -y install git patch file
 
       - uses: actions/checkout@v2
 
@@ -32,5 +32,5 @@ jobs:
       - run: cd ctags && ./cmakew install -d
       - run: file /usr/local/bin/ctags
       - run: /usr/local/bin/ctags --version
-      - run: cd ctags && ./cmakew docs html -d
+      - run: cd ctags && ./cmakew docs html -d -x
       - run: cd ctags && ./cmakew test -d -x -V --debug

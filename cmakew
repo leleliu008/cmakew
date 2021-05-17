@@ -1411,8 +1411,6 @@ __install_package_via_package_manager() {
 
     package_exists_in_repo_and_version_matched $@ || return 1
 
-    print "🔥  ${COLOR_YELLOW}required command${COLOR_OFF} ${COLOR_GREEN}$(shiftn 1 $@)${COLOR_OFF}${COLOR_YELLOW}, but${COLOR_OFF} ${COLOR_GREEN}$2${COLOR_OFF} ${COLOR_YELLOW}command not found, try to install it via${COLOR_OFF} ${COLOR_GREEN}$1${COLOR_OFF}\n"
-
     case $1 in
         pip3) case $NATIVE_OS_KIND in
                 *bsd|linux) run pip3 install --user -U "$2" ;;
