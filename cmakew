@@ -1260,7 +1260,7 @@ get_dnf_package_name_by_command_name() {
       rst2man|rst2html)
               echo "python3-docutils" ;;
     sphinx-build)
-              echo "python-sphinx" ;;
+              echo "python3-sphinx" ;;
     glibtool|libtoolize|glibtoolize)
                 echo "libtool"  ;;
     autoreconf) echo "autoconf" ;;
