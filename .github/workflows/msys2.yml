@@ -41,4 +41,4 @@ jobs:
     - run: file /usr/bin/ctags
     - run: /usr/bin/ctags --version
     - run: cd ctags && ./cmakew docs html -d
-    - run: cd ctags && ./cmakew test -d -V --debug
+    - run: cd ctags && ./cmakew test -d -V --debug --timeout 2000
