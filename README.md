@@ -44,6 +44,9 @@ chmod +x cmakew
 
         ./cmakew test [ -x | -d | --rc-file=FILE ]
 
+*   run cppcheck static analysis
+
+        ./cmakew cppcheck [ -x | -d | --rc-file=FILE ]
 
 ## zsh-completion for cmakew
 I have provided a zsh-completion script for `cmakew`. when you've typed `./cmakew` then type `TAB` key, it will auto complete the rest for you.

@@ -11,6 +11,7 @@ _cmakew_subcommands=(
     'install:install build to destination'
     'pack:pack source and binary archive'
     'test:run tests'
+    'cppcheck:run cppcheck static analysis'
     'docs:generates docs'
 )
 
