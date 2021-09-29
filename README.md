@@ -1,5 +1,5 @@
 # cmakew
-`cmakew` is a `POSIX` shell script which is desinged to help you using cmake easily.
+`cmakew` is a cmake wrapper which is desinged to help you using cmake easily.
 
 ## how to use
 ```bash
@@ -7,18 +7,44 @@ cd /path/to/your cmake project
 curl -LO https://raw.githubusercontent.com/leleliu008/cmakew/master/cmakew
 chmod +x cmakew
 ./cmakew
+
+# following instrutions is optional, and these instructions only worked in zsh
+./cmakew integrate zsh
+autoload -U compinit && compinit
 ```
 
 ## cmakew command usage
-*   print the help infomation of `cmakew` command
+*   show help of this command
 
         ./cmakew -h
         ./cmakew --help
 
-*   print the version of `cmakew`
+*   show version of this command
 
         ./cmakew -V
         ./cmakew --version
+
+*   show current machine os and environment varables
+
+        ./cmakew env
+
+*   integrate `zsh-completion` script
+
+        ./cmakew integrate zsh
+        ./cmakew integrate zsh -x
+        ./cmakew integrate zsh --china
+        ./cmakew integrate zsh --china -x
+        
+    I have provide a zsh-completion script for `cmakew`. when you've typed `./cmakew` then type `TAB` key, it will auto complete the rest for you.
+
+    **Note**: to apply this feature, you may need to run the command `autoload -U compinit && compinit`
+
+*   upgrade this software
+
+        ./cmakew upgrade
+        ./cmakew upgrade -x
+        ./cmakew upgrade --china
+        ./cmakew upgrade --china -x
 
 *   generate config
 
@@ -47,15 +73,6 @@ chmod +x cmakew
 *   run cppcheck static analysis
 
         ./cmakew cppcheck [ -x | -d | --rc-file=FILE ]
-
-## zsh-completion for cmakew
-I have provided a zsh-completion script for `cmakew`. when you've typed `./cmakew` then type `TAB` key, it will auto complete the rest for you.
-
-```
-curl -L -o /usr/local/share/zsh/site-functions/_cmakew https://raw.githubusercontent.com/leleliu008/cmakew/master/zsh-completion/_cmakew
-```
-**Note**: to apply this feature, you may need to run the command `autoload -U compinit && compinit`
-
 
 ## cmakew.rc
 `cmakew.rc` is also a `POSIX` shell script. It is a extension of `cmakew`. It will be automatically loaded if it exists. you can specify a different one via `--rc-file=FILE`.
