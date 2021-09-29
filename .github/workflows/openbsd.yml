@@ -27,7 +27,15 @@ jobs:
           run sudo pkg_add git patch file
 
           run git clone https://github.com/universal-ctags/ctags
+
           run cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
+ 
+          run ./cmakew --help
+          run ./cmakew --version
+          run ./cmakew env
+          run ./cmakew upgrade
+          run ./cmakew integrate zsh
+
           run cd ctags
           
           cat patch/*.patch | patch -p1

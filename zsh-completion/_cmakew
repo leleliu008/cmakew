@@ -1,10 +1,13 @@
 #compdef cmakew
 
 _cmakew_subcommands=(
-    '-h:print the help infomation of cmakew command'
-    '--help:print the help infomation of cmakew command'
-    '-V:print the version of cmakew'
-    '--version:print the version of cmakew'
+    '-h:show help of this command'
+    '--help:show help of this command'
+    '-V:show version of this command'
+    '--version:show version of this command'
+    'upgrade:upgrade this software.'
+    'integrate:integrate zsh completions.'
+    'env:show current machine os info.'
     'clean:remove build dir'
     'config:generate config cache'
     'build:build'
@@ -100,6 +103,18 @@ _cmakew_pack() {
         '-rc-file=[sepecify rc-file]:rc-file:{_files -g "*.rc"}'
 }
 
+_cmakew_upgrade() {
+    _arguments \
+        '-x[trace execution of commands]' \
+        '--china[use china mirror url]'
+}
+
+_cmakew_integrate() {
+    _arguments \
+        '1:what:(zsh)' \
+        '-x[trace execution of commands]' \
+        '--china[use china mirror url]'
+}
 
 function _cmakew() {
     local context state state_descr line
@@ -111,6 +126,8 @@ function _cmakew() {
 
     if [ "$state" = 'option' ] ; then
         case $words[1] in
+            upgrade)   _cmakew_upgrade ;;
+            integrate) _cmakew_integrate ;;
             clean)     _cmakew_clean   ;;
             config)    _cmakew_config  ;;
             build)     _cmakew_build   ;;

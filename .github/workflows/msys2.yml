@@ -20,25 +20,32 @@ jobs:
         shell: msys2 {0}
 
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: ${{ matrix.msystem }}
-        update: true
-        install: git patch libiconv-devel
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          install: git patch libiconv-devel
 
-    - run: git config --global core.autocrlf input
-      shell: bash
+      - run: git config --global core.autocrlf input
+        shell: bash
 
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - run: git clone https://github.com/universal-ctags/ctags
-    - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
-    
-    - run: cd ctags && cat patch/*.patch | patch -p1
+      - run: git clone https://github.com/universal-ctags/ctags
 
-    - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-    - run: cd ctags && ./cmakew install -d
-    - run: file /usr/bin/ctags
-    - run: /usr/bin/ctags --version
-    - run: cd ctags && ./cmakew docs html -d
-    - run: cd ctags && ./cmakew test -d -V --debug --timeout 2000
+      - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
+ 
+      - run: ./cmakew --help
+      - run: ./cmakew --version
+      - run: ./cmakew env
+      - run: ./cmakew upgrade
+      - run: ./cmakew integrate zsh
+ 
+      - run: cd ctags && cat patch/*.patch | patch -p1
+
+      - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+      - run: cd ctags && ./cmakew install -d
+      - run: file /usr/bin/ctags
+      - run: /usr/bin/ctags --version
+      - run: cd ctags && ./cmakew docs html -d
+      - run: cd ctags && ./cmakew test -d -V --debug --timeout 2000
