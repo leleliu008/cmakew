@@ -260,7 +260,7 @@ if (NOT HAVE_LIBXML)
 endif()
 
 if (NOT HAVE_LIBYAML)
-    foreach(item yaml.c ansibleplaybook.c)
+    foreach(item yaml.c penapi.c ansibleplaybook.c yamlfrontmatter.c)
         list(REMOVE_ITEM SRCS_PARSERS "parsers/${item}")
     endforeach()
 endif()

@@ -3928,7 +3928,7 @@ EOF
         warn "$RC_FILE not exist. skipped."
     fi
 
-    type "perform_$ACTION" | grep -q function || die "unrecognized action: $ACTION"
+    type "perform_$ACTION" 2>/dev/null | grep -q function || die "unrecognized action: $ACTION"
 
     NATIVE_OS_KIND=$(os kind)
     NATIVE_OS_TYPE=$(os type)
@@ -3960,13 +3960,14 @@ EOF
         regist_dependency required exe cmake ge "$CMAKE_VERSION_MREQUIRED"
     fi
 
-    if  type "perform_${ACTION}_pre" | grep -q function ; then
+    if  type "perform_${ACTION}_pre" 2>/dev/null | grep -q function ; then
         eval "perform_${ACTION}_pre $ACTION_ARGS"
     fi
 
     if [ "$DEBUG" = 'true' ] ; then
         step "show current machine os info"
         cat <<EOF
+NATIVE_OS_KIND  = $NATIVE_OS_KIND
 NATIVE_OS_TYPE  = $NATIVE_OS_TYPE
 NATIVE_OS_NAME  = $NATIVE_OS_NAME
 NATIVE_OS_VERS  = $NATIVE_OS_VERS
@@ -4001,7 +4002,7 @@ EOF
 
     eval "perform_$ACTION $ACTION_ARGS"
 
-    if  type "perform_${ACTION}_post" | grep -q function ; then
+    if  type "perform_${ACTION}_post" 2>/dev/null | grep -q function ; then
         eval "perform_${ACTION}_post $ACTION_ARGS"
     fi
 }
