@@ -106,9 +106,9 @@ function(optlib2c)
         file(GLOB OPTLIB_CTAGS RELATIVE ${PROJECT_SOURCE_DIR}/optlib "optlib/*.ctags")
         foreach(item ${OPTLIB_CTAGS})
             string(REPLACE ".ctags" "" item2 ${item})
-            message(STATUS "run : ${PERL_EXECUTABLE} misc/optlib2c optlib/${item} > optlib/${item2}.c")
+            message(STATUS "run : ${PERL_EXECUTABLE} ./misc/optlib2c optlib/${item} > optlib/${item2}.c")
             execute_process(
-                COMMAND ${PERL_EXECUTABLE} misc/optlib2c optlib/${item}
+                COMMAND ${PERL_EXECUTABLE} ./misc/optlib2c optlib/${item}
                 RESULT_VARIABLE ERROR
                 OUTPUT_FILE optlib/${item2}.c
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}

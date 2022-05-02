@@ -1,5 +1,5 @@
 diff --git a/main/main.c b/main/main.c
-index 2c06fe76..e0c39bae 100644
+index 6536a216..bacfaa1b 100644
 --- a/main/main.c
 +++ b/main/main.c
 @@ -22,9 +22,9 @@
@@ -10,53 +10,11 @@ index 2c06fe76..e0c39bae 100644
 +#ifdef HAVE_DECL___ENVIRON
  #include <unistd.h>
 -#elif HAVE_DECL__NSGETENVIRON
-+#elif defined(HAVE_DECL__NSGETENVIRON)
++#elif defined (HAVE_DECL__NSGETENVIRON)
  #include <crt_externs.h>
  #endif
  
-@@ -41,9 +41,11 @@
- # endif
- # include <dirent.h>  /* to declare opendir() */
- #endif
-+
- #ifdef HAVE_DIRECT_H
- # include <direct.h>  /* to _getcwd() */
- #endif
-+
- #ifdef HAVE_IO_H
- # include <io.h>  /* to declare _findfirst() */
- #endif
-@@ -121,8 +123,9 @@ static bool recurseUsingOpendir (const char *const dirName)
- 	}
- 	return resize;
- }
-+#endif
- 
--#elif defined (HAVE__FINDFIRST)
-+#if defined (HAVE__FINDFIRST)
- 
- static bool createTagsForWildcardEntry (
- 		const char *const pattern, const size_t dirLength,
-@@ -145,7 +148,6 @@ static bool createTagsForWildcardUsingFindfirst (const char *const pattern)
- {
- 	bool resize = false;
- 	const size_t dirLength = baseFilename (pattern) - pattern;
--#if defined (HAVE__FINDFIRST)
- 	struct _finddata_t fileInfo;
- 	findfirst_t hFile = _findfirst (pattern, &fileInfo);
- 	if (hFile != -1L)
-@@ -157,10 +159,8 @@ static bool createTagsForWildcardUsingFindfirst (const char *const pattern)
- 		} while (_findnext (hFile, &fileInfo) == 0);
- 		_findclose (hFile);
- 	}
--#endif
- 	return resize;
- }
--
- #endif
- 
- 
-@@ -509,9 +509,9 @@ static void sanitizeEnviron (void)
+@@ -508,9 +508,9 @@ static void sanitizeEnviron (void)
  	char **e;
  	int i;
  
@@ -64,7 +22,7 @@ index 2c06fe76..e0c39bae 100644
 +#ifdef HAVE_DECL___ENVIRON
  	e = __environ;
 -#elif HAVE_DECL__NSGETENVIRON
-+#elif defined(HAVE_DECL__NSGETENVIRON)
++#elif defined (HAVE_DECL__NSGETENVIRON)
  	{
  		char ***ep = _NSGetEnviron();
  		if (ep)

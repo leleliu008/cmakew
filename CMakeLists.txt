@@ -17,6 +17,7 @@ option(ENABLE_YAML    "if support YAML feature." ON)
 option(ENABLE_JSON    "if support JSON feature." ON)
 
 option(USE_ICONV      "if use iconv.h API." ON)
+option(USE_PCRE2      "if use pcre2 instead of gnulib-regex." OFF)
 option(USE_LIBSECCOMP "if use libseccomp."  ON)
 option(USE_GCOV       "if use gcov."        ON)
 option(USE_INTERNAL_SORT "if use internal sort, otherwise use external sort." ON)
@@ -172,6 +173,13 @@ if (USE_ICONV)
     endif()
 endif()
 
+if (USE_PCRE2)
+    find_package(PCRE2)
+    if (PCRE2_FOUND)
+        set(HAVE_PCRE2 1)
+    endif()
+endif()
+
 if (USE_LIBSECCOMP)
     find_package(LIBSECCOMP)
     if (LIBSECCOMP_FOUND)
@@ -196,11 +204,11 @@ endif()
 
 ##########################################################################################
 
-# {{{ build gnu_regex if needed
-if (NOT HAVE_REGCOMP)
-    add_library(gnu_regex STATIC gnu_regex/regex.c)
-    target_include_directories(gnu_regex INTERFACE gnu_regex)
-    target_compile_definitions(gnu_regex PRIVATE -D_GNU_SOURCE -D__USE_GNU)
+# {{{ build gnulib if needed
+if (NOT USE_PCRE2 AND NOT HAVE_REGCOMP)
+    add_library(gnu STATIC gnulib/regex.c)
+    target_include_directories(gnu PRIVATE gnulib)
+    target_compile_definitions(gnu PRIVATE -D_GNU_SOURCE -D__USE_GNU)
 endif()
 # }}}
 
@@ -214,11 +222,13 @@ if (INSTALL_READTAGS)
     list(REMOVE_ITEM SRCS_DSL   "dsl/optscript.c")
     list(REMOVE_ITEM SRCS_EXTRA "extra-cmds/optscript-repl.c")
 
-    add_executable(readtags libreadtags/readtags.c main/mio.c ${SRCS_DSL} ${SRCS_EXTRA})
-    
-    if (NOT HAVE_REGCOMP)
-        target_link_libraries(readtags gnu_regex)
+    add_executable(readtags libreadtags/readtags.c main/mio.c main/routines.c main/trashbox.c main/vstring.c ${SRCS_DSL} ${SRCS_EXTRA})
+
+    if (NOT USE_PCRE2 AND NOT HAVE_REGCOMP)
+        target_link_libraries(readtags gnu)
     endif()
+
+    target_include_directories(readtags PRIVATE main)
     target_include_directories(readtags PRIVATE libreadtags)
     target_include_directories(readtags PRIVATE ${PROJECT_SOURCE_DIR})
     target_compile_definitions(readtags PRIVATE -DREADTAGS_DSL)
@@ -255,6 +265,13 @@ if (NOT HAVE_LIBYAML)
     endforeach()
 endif()
 
+if (NOT HAVE_PCRE2)
+    foreach(item lregex-pcre2.c)
+        list(REMOVE_ITEM SRCS_CTAGS "main/${item}")
+    endforeach()
+endif()
+
+include_directories(.)
 include_directories(main)
 # }}}
 
@@ -266,11 +283,12 @@ add_library(libctags STATIC src/datetime/datetime.c dsl/optscript.c dsl/es.c ${S
 target_include_directories(libctags PRIVATE src)
 target_include_directories(libctags PRIVATE peg)
 target_include_directories(libctags PRIVATE dsl)
+target_include_directories(libctags PRIVATE parsers/cxx)
 target_compile_definitions(libctags PRIVATE -DHAVE_PACKCC)
 
-if (NOT HAVE_REGCOMP)
-    target_include_directories(libctags PUBLIC  gnu_regex)
-    target_link_libraries(     libctags         gnu_regex)
+if (NOT USE_PCRE2 AND NOT HAVE_REGCOMP)
+    target_include_directories(libctags PUBLIC  gnu)
+    target_link_libraries(     libctags         gnu)
 endif()
 
 if (HAVE_LIBXML)
@@ -291,6 +309,11 @@ endif()
 if (HAVE_ICONV)
     target_include_directories(libctags PRIVATE ${ICONV_INCLUDE_DIR})
     target_link_libraries(     libctags         ${ICONV_LIBRARY})
+endif()
+
+if (HAVE_PCRE2)
+    target_include_directories(libctags PRIVATE ${PCRE2_INCLUDE_DIR})
+    target_link_libraries(     libctags         ${PCRE2_LIBRARY})
 endif()
 
 if (HAVE_SECCOMP)

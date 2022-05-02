@@ -1,21 +1,22 @@
-# CMake Build System
+# CMake Build System support for [universal-ctags](https://github.com/universal-ctags/ctags)
 
 ## requirements
-|software&nbsp;&nbsp;&nbsp;|required?|purpose|note|
+|tool|required?|purpose|note|
 |-|-|-|-|
 |[cmake](https://cmake.org/)|required|for generating low-level build system config file||
-|[pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)|required|for finding libraries||
-|[python](https://www.python.org/)|recommended|for providing a runtime for `docutils`|if can't found, manpages will not be installed.|
-|[docutils](https://docutils.sourceforge.io/)|recommended|for generating manpages|if can't found, manpages will not be installed.|
+|[pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)|required|for finding libraries|[pkgconf](http://pkgconf.org/) can be installed as a alternative.|
+|[python](https://www.python.org/)|optional|for providing a runtime for `docutils` and run tests.|if can't found, manpages will not be installed.|
+|[docutils](https://docutils.sourceforge.io/)|optional|for generating manpages|if can't found, manpages will not be installed.|
 |[perl](https://www.perl.org/)|recommended|for converting peg files to c files.|if can't found, just using pre-converted c files.|
 
 |library|required?|purpose|note|
 |-|-|-|-|
-|[libiconv](http://www.gnu.org/software/libiconv/)|recommended|text coding convert support.|this library have been already included in some platform.|
-|[libxml2](http://xmlsoft.org/)|recommended|XML support||
-|[libyaml](https://github.com/yaml/libyaml/)|recommended|YAML support||
-|[jansson](https://github.com/akheron/jansson)|recommended|JSON support||
-|[libseccomp](https://github.com/seccomp/libseccomp/)|recommended|sandbox support|available on GNU/Linux|
+|[libiconv](http://www.gnu.org/software/libiconv/)|optional|text coding convert support.|this library have been already included in some platform.|
+|[pcre2](https://github.com/PhilipHazel/pcre2)|optional|regex support|default regex library is [gnulib-regex](https://www.gnu.org/software/gnulib/) which is included in our source code. if you want to use pcre2, you should know the differences between [POSIX Regular Expresion syntax](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html) and [Perl5 Regular Expresion syntax](https://perldoc.perl.org/perlre).|
+|[libxml2](http://xmlsoft.org/)|optional|XML support||
+|[libyaml](https://github.com/yaml/libyaml/)|optional|YAML support||
+|[jansson](https://github.com/akheron/jansson)|optional|JSON support||
+|[libseccomp](https://github.com/seccomp/libseccomp/)|optional|sandbox support|only available on GNU/Linux|
 
 ## custom cmake options
 |option|type|default|purpose|
@@ -30,7 +31,8 @@
 |ENABLE_JSON|BOOL|ON|if support `JSON` feature.|
 |||||
 |USE_ICONV|BOOL|ON|if use [iconv.h](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/iconv.h.html) API.|
-|USE_LIBSECCOMP|BOOL|ON|if use `libseccomp`.|
+|USE_PCRE2|BOOL|ON|if use [pcre2](https://github.com/PhilipHazel/pcre2) instead of [gnulib-regex](https://www.gnu.org/software/gnulib/).|
+|USE_LIBSECCOMP|BOOL|ON|if use [libseccomp](https://github.com/seccomp/libseccomp/).|
 |USE_INTERNAL_SORT|BOOL|ON|if use internal `sort`, otherwise use external `sort`.|
 |USE_GCOV|BOOL|ON|if use `gcov`.|
 |||||
@@ -258,3 +260,19 @@ ctest --test-dir build.d -R roundtrip
 
 ## cmakew
 some old version of system's package manager install very old version of cmake. I encourage user to use `cmakew` but using `cmake` directly.
+
+
+## how to let only static libraries are linked
+```
+mkdir $HOME/static-libraries
+cd    $HOME/static-libraries
+
+ln -sf /usr/bin/libiconv.a   $PWD/libiconv.a
+ln -sf /usr/bin/libxml2.a    $PWD/libxml2.a
+ln -sf /usr/bin/libyaml.a    $PWD/libyaml.a
+ln -sf /usr/bin/libjansson.a $PWD/libjansson.a
+ln -sf /usr/bin/libpcre2-8.a $PWD/libpcre2-8.a
+
+# https://cmake.org/cmake/help/latest/envvar/LDFLAGS.html
+export LDFLAGS=$HOME/static-libraries
+```
