@@ -6,6 +6,10 @@ perform_config_pre() {
     regist_dependency required exe perl
     regist_dependency required exe python3:python:python3.9:python3.8:python3.7:python3.6:python3.5 ge 3.5
     regist_dependency optional exe rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
+
+    if [ "$NATIVE_OS_TYPE" = alpine ] ; then
+        $sudo apk add musl-dev
+    fi
 }
 
 perform_test_pre() {

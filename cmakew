@@ -2330,7 +2330,11 @@ __pmw_install_the_given_package() {
         esac
     } || return 1
 
-    __pmw_is_the_given_package_available $@ || return 1
+    # choco and pkg_add can not get a package's version
+    case $1 in
+        choco|pkg_add) ;;
+        *) __pmw_is_the_given_package_available $@ || return 1
+    esac
 
     note "${COLOR_GREEN}$(shiftn 2 $@)${COLOR_OFF} ${COLOR_YELLOW}command is required, but it is not found on this machine, I will install it via${COLOR_OFF} ${COLOR_GREEN}$1${COLOR_OFF}"
 
