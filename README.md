@@ -81,11 +81,11 @@ a typical example of this file looks like as follows:
 
 ```bash
 perform_config_pre() {
-    regist_dependency required command cc:gcc:clang
-    regist_dependency required command pkg-config ge 0.18
-    regist_dependency required command perl
-    regist_dependency required command python3:python:python3.5:python3.6:python3.7:python3.8:python3.9 ge 3.5
-    regist_dependency optional command rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
+    regist_dependency required exe cc:gcc:clang
+    regist_dependency required exe pkg-config ge 0.18
+    regist_dependency required exe perl
+    regist_dependency required exe python3:python:python3.5:python3.6:python3.7:python3.8:python3.9 ge 3.5
+    regist_dependency optional exe rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
 }
 
 perform_xxxx() {
