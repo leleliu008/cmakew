@@ -37,7 +37,7 @@ jobs:
 
           run cd ctags
           
-          cat patch/*.patch | patch -p1
+          cat patch/main-main.c.patch | patch -p1
 
           run ./cmakew config -d -DCMAKE_BUILD_TYPE=Release
           run ./cmakew install -d
