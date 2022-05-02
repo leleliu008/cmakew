@@ -43,7 +43,7 @@ jobs:
  
       - run: cd ctags && cat patch/main-main.c.patch | patch -p1
 
-      - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+      - run: cd ctags && ./cmakew config -x -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
       - run: cd ctags && ./cmakew install -d
       - run: file /usr/bin/ctags
       - run: /usr/bin/ctags --version

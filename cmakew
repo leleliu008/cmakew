@@ -3629,9 +3629,11 @@ perform_config() {
     fi
 
     if run cmake $CMAKE_FLAGS ; then
-        printf "%s\n" "BUILD_DIR='$BUILD_DIR'"  > "$PROJECT_DIR/.cmakew"
-        printf "%s\n" "BUILD_SYS='$BUILD_SYS'" >> "$PROJECT_DIR/.cmakew"
-        printf "%s\n" "BUILD_YES=0"            >> "$PROJECT_DIR/.cmakew"
+        cat > "$PROJECT_DIR/.cmakew" <<EOF
+BUILD_DIR='$BUILD_DIR'
+BUILD_SYS='$BUILD_SYS'
+BUILD_YES=0
+EOF
     else
         rm -f "$PROJECT_DIR/.cmakew"
         return 1
@@ -3645,9 +3647,11 @@ perform_build() {
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
         if run cmake --build "$BUILD_DIR" ; then
-            printf "%s\n" "BUILD_DIR='$BUILD_DIR'"  > "$PROJECT_DIR/.cmakew"
-            printf "%s\n" "BUILD_SYS='$BUILD_SYS'" >> "$PROJECT_DIR/.cmakew"
-            printf "%s\n" "BUILD_YES=1"            >> "$PROJECT_DIR/.cmakew"
+            cat > "$PROJECT_DIR/.cmakew" <<EOF
+BUILD_DIR='$BUILD_DIR'
+BUILD_SYS='$BUILD_SYS'
+BUILD_YES=1
+EOF
         else
             return 1
         fi
@@ -3661,9 +3665,11 @@ perform_build() {
 perform_install() {
     if [ -f .cmakew ] ; then
         . ./.cmakew || return 1
+
         if [ "$BUILD_YES" != 1 ] ; then
-            main build || return 1
+            main build
         fi
+
         [ "$DEBUG" = 'true' ] && step 'perform cmakew install'
         # https://stackoverflow.com/questions/34040522/is-there-a-cmake-install-switch/34040747
         if command_exists_in_filesystem_and_version_matched cmake ge 3.15.0 ; then

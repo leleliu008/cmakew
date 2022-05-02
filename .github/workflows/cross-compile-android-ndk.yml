@@ -37,7 +37,7 @@ jobs:
 
       - run: |
             cd ctags
-            ./cmakew config -d \
+            ./cmakew config -x \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_INSTALL_PREFIX=./output/android \
                 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \

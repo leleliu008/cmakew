@@ -31,7 +31,7 @@ jobs:
 
       - run: cd ctags && cat patch/main-main.c.patch | patch -p1
 
-      - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release
+      - run: cd ctags && ./cmakew config -x -DCMAKE_BUILD_TYPE=Release
       - run: cd ctags && sudo ./cmakew install -d
       - run: sudo file /usr/local/bin/ctags
       - run: sudo /usr/local/bin/ctags --version
