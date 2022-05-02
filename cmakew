@@ -3804,14 +3804,16 @@ EOF
             return 0
             ;;
         -V|--version)
-            echo '1.0.0'
+            printf '%s\n' '1.0.0'
             return 0
             ;;
         upgrade)
+            shift
             __upgrade_self 'https://raw.githubusercontent.com/leleliu008/cmakew/master/cmakew' $@
             return 0
             ;;
         integrate)
+            shift
             __integrate_zsh_completions 'https://raw.githubusercontent.com/leleliu008/cmakew/master/zsh-completion/_cmakew' $@
             return 0
             ;;
