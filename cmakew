@@ -2830,7 +2830,7 @@ EOF
     NATIVE_OS_ARCH=$(os arch)
     NATIVE_OS_LIBC=$(os libc)
 
-    if [ "$NATIVE_OS_KIND" != 'windows' ] && [ "$NATIVE_OS_SUBS" != termux ] ; then
+    if [ "$NATIVE_OS_TYPE" != 'windows' ] && [ "$NATIVE_OS_SUBS" != termux ] ; then
         [ "$(whoami)" = root ] || sudo=sudo
     fi
 

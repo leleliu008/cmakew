@@ -17,11 +17,11 @@ jobs:
     runs-on: ubuntu-${{ matrix.version }}
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - run: git clone https://github.com/universal-ctags/ctags
+      - run: git clone https://github.com/universal-ctags/ctags
 
-    - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
+      - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
 
       - run: ./cmakew --help
       - run: ./cmakew --version
@@ -29,11 +29,11 @@ jobs:
       - run: ./cmakew upgrade
       - run: ./cmakew integrate zsh
 
-    - run: cd ctags && cat patch/main-main.c.patch | patch -p1
+      - run: cd ctags && cat patch/main-main.c.patch | patch -p1
 
-    - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release
-    - run: cd ctags && sudo ./cmakew install -d
-    - run: sudo file /usr/local/bin/ctags
-    - run: sudo /usr/local/bin/ctags --version
-    - run: cd ctags && ./cmakew docs html -d
-    - run: cd ctags && ./cmakew test -d -V --debug
+      - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release
+      - run: cd ctags && sudo ./cmakew install -d
+      - run: sudo file /usr/local/bin/ctags
+      - run: sudo /usr/local/bin/ctags --version
+      - run: cd ctags && ./cmakew docs html -d
+      - run: cd ctags && ./cmakew test -d -V --debug

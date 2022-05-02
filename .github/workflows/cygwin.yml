@@ -15,24 +15,24 @@ jobs:
         shell: cygwin {0}
 
     steps:
-    - run: choco install -y cygwin
-      shell: pwsh
+      - run: choco install -y cygwin
+        shell: pwsh
 
-    - run: C:\tools\cygwin\bin\bash.exe --login -i -c "sed -i 's/--login -i/--login -i %1/' /cygdrive/c/tools/cygwin/Cygwin.bat"
-      shell: pwsh
-   
-    - run: choco install -y --source cygwin git patch file
-    
-    - run: git config --global core.autocrlf input
-      shell: bash
+      - run: C:\tools\cygwin\bin\bash.exe --login -i -c "sed -i 's/--login -i/--login -i %1/' /cygdrive/c/tools/cygwin/Cygwin.bat"
+        shell: pwsh
 
-    - uses: actions/checkout@v2
-    
-    - run: printf 'cd %s' "$(cygpath '${{ github.workspace }}')" >> ~/.bashrc
+      - run: choco install -y --source cygwin git patch file
 
-    - run: git clone https://github.com/universal-ctags/ctags
+      - run: git config --global core.autocrlf input
+        shell: bash
 
-    - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
+      - uses: actions/checkout@v2
+
+      - run: printf 'cd %s' "$(cygpath '${{ github.workspace }}')" >> ~/.bashrc
+
+      - run: git clone https://github.com/universal-ctags/ctags
+
+      - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
 
       - run: ./cmakew --help
       - run: ./cmakew --version
@@ -40,13 +40,13 @@ jobs:
       - run: ./cmakew upgrade
       - run: ./cmakew integrate zsh
 
-    - run: cd ctags && cat patch/main-main.c.patch | patch -p1
+      - run: cd ctags && cat patch/main-main.c.patch | patch -p1
 
-    - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/usr/bin/make
-    - run: cd ctags && cat build.d/CMakeFiles/CMakeOutput.log
-    - run: cd ctags && cat build.d/CMakeFiles/CMakeError.log
-    - run: cd ctags && ./cmakew install -d
-    - run: file /usr/local/bin/ctags
-    - run: /usr/local/bin/ctags --version
-    - run: cd ctags && ./cmakew docs html -d
-    - run: cd ctags && ./cmakew test -d -V --debug --timeout 2000
+      - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/usr/bin/make
+      - run: cd ctags && cat build.d/CMakeFiles/CMakeOutput.log
+      - run: cd ctags && cat build.d/CMakeFiles/CMakeError.log
+      - run: cd ctags && ./cmakew install -d
+      - run: file /usr/local/bin/ctags
+      - run: /usr/local/bin/ctags --version
+      - run: cd ctags && ./cmakew docs html -d
+      - run: cd ctags && ./cmakew test -d -V --debug --timeout 2000

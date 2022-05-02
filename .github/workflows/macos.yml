@@ -16,13 +16,13 @@ jobs:
     runs-on: macos-${{ matrix.version }}
 
     steps:
-    - uses: actions/checkout@v2
-    
-    - run: brew install jansson libxml2 libyaml
+      - uses: actions/checkout@v2
 
-    - run: git clone https://github.com/universal-ctags/ctags
+      - run: brew install jansson libxml2 libyaml
 
-    - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
+      - run: git clone https://github.com/universal-ctags/ctags
+
+      - run: cp -r cmake cmakew cmakew.rc CMakeLists.txt src patch misc ctags/
 
       - run: ./cmakew --help
       - run: ./cmakew --version
@@ -30,11 +30,11 @@ jobs:
       - run: ./cmakew upgrade
       - run: ./cmakew integrate zsh
 
-    - run: cd ctags && cat patch/main-main.c.patch | patch -p1
+      - run: cd ctags && cat patch/main-main.c.patch | patch -p1
 
-    - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release
-    - run: cd ctags && ./cmakew install -d
-    - run: file /usr/local/bin/ctags
-    - run: /usr/local/bin/ctags --version
-    - run: cd ctags && ./cmakew docs html -d
-    - run: cd ctags && ./cmakew test -d -V --debug
+      - run: cd ctags && ./cmakew config -d -DCMAKE_BUILD_TYPE=Release
+      - run: cd ctags && ./cmakew install -d
+      - run: file /usr/local/bin/ctags
+      - run: /usr/local/bin/ctags --version
+      - run: cd ctags && ./cmakew docs html -d
+      - run: cd ctags && ./cmakew test -d -V --debug

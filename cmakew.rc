@@ -1,29 +1,29 @@
 # https://github.com/leleliu008/cmakew
 
 perform_config_pre() {
-    regist_dependency required command cc:gcc:clang
-    regist_dependency required command pkg-config ge 0.18
-    regist_dependency required command perl
-    regist_dependency required command python3:python:python3.9:python3.8:python3.7:python3.6:python3.5 ge 3.5
+    regist_dependency required cmd cc:gcc:clang
+    regist_dependency required cmd pkg-config ge 0.18
+    regist_dependency required cmd perl
+    regist_dependency required cmd python3:python:python3.9:python3.8:python3.7:python3.6:python3.5 ge 3.5
     regist_dependency optional command rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
 }
 
 perform_test_pre() {
-    regist_dependency required command python3:python:python3.9:python3.8:python3.7:python3.6:python3.5 ge 3.5
-    regist_dependency required command rst2man:rst2man.py:rst2man-3:rst2man-3.9:rst2man-3.8:rst2man-3.7:rst2man-3.6
-    regist_dependency required command find
-    regist_dependency required command diff
+    regist_dependency required cmd python3:python:python3.9:python3.8:python3.7:python3.6:python3.5 ge 3.5
+    regist_dependency required cmd rst2man:rst2man.py:rst2man-3:rst2man-3.9:rst2man-3.8:rst2man-3.7:rst2man-3.6
+    regist_dependency required cmd find
+    regist_dependency required cmd diff
 }
 
 perform_docs_pre() {
     # https://www.sphinx-doc.org/en/master/usage/installation.html
     # Sphinx is written in Python and supports Python 3.6+.
-    regist_dependency required command python3:python:python3.9:python3.8:python3.7 ge 3.7
-    regist_dependency required command sphinx-build
+    regist_dependency required cmd python3:python:python3.9:python3.8:python3.7 ge 3.7
+    regist_dependency required cmd sphinx-build
     
     case $NATIVE_OS_TYPE in
-        *bsd) regist_dependency required command gmake ;;
-        *)    regist_dependency required command gmake:make
+        *bsd) regist_dependency required cmd gmake ;;
+        *)    regist_dependency required cmd gmake:make
     esac
 }
 
@@ -34,8 +34,8 @@ perform_docs() {
 }
 
 perform_fuzz_pre() {
-    regist_dependency required command zsh:bash:dash
-    regist_dependency required command valgrind
+    regist_dependency required cmd zsh:bash:dash
+    regist_dependency required cmd valgrind
 }
 
 perform_fuzz() {
@@ -56,8 +56,8 @@ perform_fuzz() {
 }
 
 perform_noise_pre() {
-    regist_dependency required command zsh:bash:dash
-    regist_dependency required command valgrind
+    regist_dependency required cmd zsh:bash:dash
+    regist_dependency required cmd valgrind
 }
 
 perform_noise() {
