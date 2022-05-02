@@ -3814,8 +3814,14 @@ EOF
             ;;
         integrate)
             shift
-            __integrate_zsh_completions 'https://raw.githubusercontent.com/leleliu008/cmakew/master/zsh-completion/_cmakew' $@
-            return 0
+            case $1 in
+                zsh)
+                    shift
+                    __integrate_zsh_completions 'https://raw.githubusercontent.com/leleliu008/cmakew/master/zsh-completion/_cmakew' $@
+                    return 0
+                    ;;
+                *)  die "cmakew integrate $1: not support."
+            esac
             ;;
          env)
             echo "${COLOR_GREEN}cmakew ($MY_VERSION) is a cmake wrapper which is desinged to help you using cmake easily.${COLOR_OFF}"
