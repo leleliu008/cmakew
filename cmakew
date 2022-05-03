@@ -2419,7 +2419,13 @@ EOF
 __pmw_is_the_given_package_available() {
     if [ $# -eq 3 ] ; then
         case $1 in
-            pkg) pkg show "$3" > /dev/null 2>&1 ;;
+            pkg)
+                if [ "$NATIVE_OS_KIND" = freebsd ] ; then
+                    pkg search -S name "^$1$" > /dev/null 2>&1
+                else
+                    pkg show "$3" > /dev/null 2>&1
+                fi
+                ;;
             apt) apt show "$3" > /dev/null 2>&1 ;;
             apk) apk info "$3" > /dev/null 2>&1 ;;
             yum) yum info "$3" > /dev/null 2>&1 ;;
@@ -2447,7 +2453,13 @@ __pmw_is_the_given_package_available() {
 # __pmw_get_available_package_version_by_package_name apt automake
 __pmw_get_available_package_version_by_package_name() {
     case $1 in
-        pkg)   pkg show "$2" 2> /dev/null | sed -n '/Version: /p' | head -n 1 | cut -d ' ' -f2 | cut -d- -f1  | cut -d~ -f1 | sed 's/[0-9]://' ;;
+        pkg)
+            if [ "$NATIVE_OS_KIND" = freebsd ] ; then
+                pkg search -S pkg-name "^$1-[0-9]" | cut -d ' ' -f1 | cut -d- -f2 | tr _ .
+            else
+                pkg show "$2" 2> /dev/null | sed -n '/Version: /p' | head -n 1 | cut -d ' ' -f2 | cut -d- -f1  | cut -d~ -f1 | sed 's/[0-9]://'
+            fi
+            ;;
         apt)   apt show "$2" 2> /dev/null | sed -n '/Version: /p' | head -n 1 | cut -d ' ' -f2 | cut -d- -f1  | cut -d~ -f1 | sed 's/[0-9]://' ;;
         apk)   apk info "$2" 2> /dev/null | head -n 1 | cut -d ' ' -f1 | cut -d- -f2 ;;
         yum)   yum info "$2" 2> /dev/null | sed -n '/Version     :/p'  | head -n 1 | cut -d : -f2 | sed 's/^[[:space:]]//' ;;
