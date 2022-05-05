@@ -4,25 +4,29 @@ perform_config_pre() {
     regist_dependency required exe cc:gcc:clang
     regist_dependency required exe pkg-config ge 0.18
     regist_dependency required exe perl
-    regist_dependency required exe python3:python:python3.9:python3.8:python3.7:python3.6:python3.5 ge 3.5
+    regist_dependency required exe python3:python:python3.10:python3.9:python3.8:python3.7:python3.6 ge 3.6
     regist_dependency optional exe rst2man:rst2man.py:rst2man-3:rst2man-3.6:rst2man-3.7:rst2man-3.8:rst2man-3.9
 
     if [ "$NATIVE_OS_TYPE" = alpine ] ; then
-        $sudo apk add musl-dev
+        run $sudo apk add musl-dev
     fi
 }
 
 perform_test_pre() {
-    regist_dependency required exe python3:python:python3.9:python3.8:python3.7:python3.6:python3.5 ge 3.5
+    regist_dependency required exe python3:python:python3.10:python3.9:python3.8:python3.7:python3.6 ge 3.6
     regist_dependency required exe rst2man:rst2man.py:rst2man-3:rst2man-3.9:rst2man-3.8:rst2man-3.7:rst2man-3.6
     regist_dependency required exe find
     regist_dependency required exe diff
+
+    if [ "$NATIVE_OS_TYPE" = alpine ] ; then
+        run $sudo apk add diffutils
+    fi
 }
 
 perform_docs_pre() {
     # https://www.sphinx-doc.org/en/master/usage/installation.html
     # Sphinx is written in Python and supports Python 3.6+.
-    regist_dependency required exe python3:python:python3.9:python3.8:python3.7 ge 3.7
+    regist_dependency required exe python3:python:python3.10:python3.9:python3.8:python3.7 ge 3.6
     regist_dependency required exe sphinx-build
     
     case $NATIVE_OS_TYPE in
