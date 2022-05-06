@@ -44,10 +44,8 @@ jobs:
 
     steps:
       - run: |
-          sed -i 's|#baseurl=|baseurl=|g'       /etc/yum.repos.d/CentOS-Base.repo
-          sed -i 's|mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/CentOS-Base.repo
-          sed -i 's|mirror|vault|g'             /etc/yum.repos.d/CentOS-Base.repo
-          sed -i 's|http:|https:|g'             /etc/yum.repos.d/CentOS-Base.repo
+          sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+          sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
       - run: dnf -y update
       - run: dnf -y install patch file
