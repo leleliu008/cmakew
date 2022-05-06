@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  centos-7.5.1804:
+  centos7:
     runs-on: ubuntu-20.04
 
     container: centos:7.5.1804
@@ -37,7 +37,7 @@ jobs:
       - run: cd ctags && ./cmakew docs html -d
       - run: cd ctags && ./cmakew test -d -V --debug
 
-  centos-8.3.2011:
+  centos8:
     runs-on: ubuntu-20.04
 
     container: centos:8.3.2011
