@@ -2066,6 +2066,13 @@ __pmw_get_available_package_name_by_command_name_dnf() {
             echo 'pkg-config'
         fi
         ;;
+    python3|python)
+        if [ "$NATIVE_OS_TYPE" = fedora ] ; then
+            echo 'python3'
+        else
+            echo 'python39'
+        fi
+        ;;
     rst2man|rst2html)
                   echo "python3-docutils" ;;
     sphinx-build) echo "python3-sphinx" ;;
