@@ -46,6 +46,7 @@ add_definitions(-DHAVE_CONFIG_H)
 add_definitions(-D_GNU_SOURCE)
 
 include_directories(${PROJECT_BINARY_DIR})
-include_directories(.)
+include_directories(${PROJECT_SOURCE_DIR})
+include_directories(../win32/gnulib_h)
 
 add_library(gnulib-regex STATIC regex.c)
