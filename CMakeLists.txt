@@ -207,9 +207,7 @@ endif()
 # {{{ build gnulib if needed
 if (NOT USE_PCRE2 AND NOT HAVE_REGCOMP)
     set(USE_GNULIB_REGEX TRUE)
-    add_library(gnu STATIC gnulib/regex.c)
-    target_include_directories(gnu PRIVATE gnulib)
-    target_compile_definitions(gnu PRIVATE -D_GNU_SOURCE -D__USE_GNU)
+    add_subdirectory(gnulib)
 endif()
 # }}}
 
@@ -226,7 +224,7 @@ if (INSTALL_READTAGS)
     add_executable(readtags libreadtags/readtags.c main/mio.c main/routines.c main/trashbox.c main/vstring.c ${SRCS_DSL} ${SRCS_EXTRA})
 
     if (USE_GNULIB_REGEX)
-        target_link_libraries(readtags gnu)
+        target_link_libraries(readtags gnulib-regex)
     endif()
 
     target_include_directories(readtags PRIVATE main)
@@ -288,8 +286,8 @@ target_include_directories(libctags PRIVATE parsers/cxx)
 target_compile_definitions(libctags PRIVATE -DHAVE_PACKCC)
 
 if (USE_GNULIB_REGEX)
-    target_include_directories(libctags PUBLIC  gnu)
-    target_link_libraries(     libctags         gnu)
+    target_include_directories(libctags PUBLIC  gnulib)
+    target_link_libraries(     libctags         gnulib-regex)
 endif()
 
 if (HAVE_LIBXML)

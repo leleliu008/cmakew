@@ -41,7 +41,7 @@ jobs:
       - run: ./cmakew upgrade
       - run: ./cmakew integrate zsh
  
-      - run: cd ctags && cat patch/main-main.c.patch | patch -p1
+      - run: cd ctags && cat patch/main-main.c.patch gnulib/regex_internal.diff | patch -p1
 
       - run: cd ctags && ./cmakew config -x -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
       - run: cd ctags && ./cmakew install -d

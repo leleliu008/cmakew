@@ -64,6 +64,9 @@
 /* Define if support multibyte character encoding. */
 #cmakedefine HAVE_ICONV
 
+/* Define if pcre2 library is available. */
+#cmakedefine HAVE_PCRE2
+
 /* Define if jansson library is available. */
 #cmakedefine HAVE_JANSSON
 

@@ -1,0 +1,31 @@
+diff --git a/gnulib/regex_internal.h b/gnulib/regex_internal.h
+index 1245e782..c600d948 100644
+--- a/gnulib/regex_internal.h
++++ b/gnulib/regex_internal.h
+@@ -77,7 +77,7 @@
+ #endif
+ 
+ /* In case that the system doesn't have isblank().  */
+-#if !defined _LIBC && ! (defined isblank || (HAVE_ISBLANK && HAVE_DECL_ISBLANK))
++#if !defined _LIBC && ! (defined isblank || (defined(HAVE_ISBLANK) && defined(HAVE_DECL_ISBLANK)))
+ # define isblank(ch) ((ch) == ' ' || (ch) == '\t')
+ #endif
+ 
+@@ -98,7 +98,7 @@
+ #endif
+ 
+ /* This is for other GNU distributions with internationalized messages.  */
+-#if (HAVE_LIBINTL_H && ENABLE_NLS) || defined _LIBC
++#if (defined(HAVE_LIBINTL_H) && defined(ENABLE_NLS)) || defined _LIBC
+ # include <libintl.h>
+ # ifdef _LIBC
+ #  undef gettext
+@@ -116,7 +116,7 @@
+ # define gettext_noop(String) String
+ #endif
+ 
+-#if (defined MB_CUR_MAX && HAVE_WCTYPE_H && HAVE_ISWCTYPE) || _LIBC
++#if (defined(MB_CUR_MAX) && defined(HAVE_WCTYPE_H) && defined(HAVE_ISWCTYPE)) || _LIBC
+ # define RE_ENABLE_I18N
+ #endif
+ 

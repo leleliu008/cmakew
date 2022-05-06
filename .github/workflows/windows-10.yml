@@ -26,6 +26,7 @@ jobs:
     - run: cd ../ctags & patch -p1 -i patch/main-general.h.patch
     - run: cd ../ctags & patch -p1 -i patch/main-options.c.patch
     - run: cd ../ctags & patch -p1 -i patch/main-main.c.patch
+    - run: cd ../ctags & patch -p1 -i gnulib/regex_internal.diff
 
     - run: cd ../ctags & build.bat 2019
 
