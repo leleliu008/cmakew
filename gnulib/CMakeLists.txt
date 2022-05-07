@@ -34,9 +34,9 @@ endfunction()
 
 # {{{ checking
 
-check_if_have_header_files(alloca.h fcntl.h inttypes.h langinfo.h libintl.h malloc.h minix/config.h netdb.h os.h stdint.h stdio.h stdlib.h strings.h string.h sys/param.h sys/stat.h sys/time.h sys/types.h unistd.h wchar.h)
+check_if_have_header_files(alloca.h fcntl.h inttypes.h langinfo.h libintl.h fnmatch.h malloc.h minix/config.h netdb.h os.h stdint.h stdio.h stdlib.h strings.h string.h sys/param.h sys/stat.h sys/time.h sys/types.h unistd.h wchar.h)
 
-check_if_have_functions(alloca btowc getpagesize isascii iswprint localeconv malloc mbrtowc memchr memmove mempcpy memset nl_langinfo realloc regcomp re_comp setlocale strchr strrchr)
+check_if_have_functions(alloca btowc getpagesize isascii iswprint localeconv fnmatch malloc mbrtowc memchr memmove mempcpy memset nl_langinfo realloc regcomp re_comp setlocale strchr strrchr)
 
 ##########################################################################################
 
@@ -47,6 +47,19 @@ add_definitions(-D_GNU_SOURCE)
 
 include_directories(${PROJECT_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
-include_directories(../win32/gnulib_h)
 
-add_library(gnulib-regex STATIC regex.c)
+if (NOT HAVE_REGCOMP)
+    list(APPEND SRCS regex.c)
+endif()
+
+if (NOT HAVE_FNMATCH)
+    list(APPEND SRCS fnmatch.c)
+endif()
+
+if (NOT HAVE_NL_LANGINFO)
+    list(APPEND SRCS nl_langinfo.c)
+endif()
+
+if (SRCS)
+    add_library(gnu STATIC ${SRCS})
+endif()

@@ -224,7 +224,7 @@ if (INSTALL_READTAGS)
     add_executable(readtags libreadtags/readtags.c main/mio.c main/routines.c main/trashbox.c main/vstring.c ${SRCS_DSL} ${SRCS_EXTRA})
 
     if (USE_GNULIB_REGEX)
-        target_link_libraries(readtags gnulib-regex)
+        target_link_libraries(readtags gnu)
     endif()
 
     target_include_directories(readtags PRIVATE main)
@@ -287,7 +287,7 @@ target_compile_definitions(libctags PRIVATE -DHAVE_PACKCC)
 
 if (USE_GNULIB_REGEX)
     target_include_directories(libctags PUBLIC  gnulib)
-    target_link_libraries(     libctags         gnulib-regex)
+    target_link_libraries(     libctags         gnu)
 endif()
 
 if (HAVE_LIBXML)
